@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -6,30 +7,58 @@ namespace SimpleTwitchBot
 {
     public class IrcClient
     {
+        private readonly string _ip;
+        private readonly int _port;
         private readonly TcpClient _tcpClient;
 
-        private string _username;
+        public string Username { get; private set; }
+
         private string _channel;
         private StreamReader _inputStream;
         private StreamWriter _outputStream;
 
-        public IrcClient()
+        public event Action<IrcClient, string> OnMessage;
+
+        public IrcClient(string ip, int port)
         {
+            _ip = ip;
+            _port = port;
             _tcpClient = new TcpClient();
         }
 
-        public async Task ConnectAsync(string ip, int port, string username, string password)
+        public async Task ConnectAsync(string username, string password)
         {
-            _username = username;
+            Username = username;
 
-            await _tcpClient.ConnectAsync(ip, port);
-            _inputStream = new StreamReader(_tcpClient.GetStream());
-            _outputStream = new StreamWriter(_tcpClient.GetStream());
+            await _tcpClient.ConnectAsync(_ip, _port);
+            NetworkStream stream = _tcpClient.GetStream();
+            _inputStream = new StreamReader(stream);
+            _outputStream = new StreamWriter(stream);
 
-            _outputStream.WriteLine("PASS " + password);
-            _outputStream.WriteLine("NICK " + username);
+            _outputStream.WriteLine($"PASS {password}");
+            _outputStream.WriteLine($"NICK {username}");
             _outputStream.WriteLine($"USER {username} 8 * :{username}");
             _outputStream.Flush();
+            StartListen();
+        }
+
+        public void Disconnect()
+        {
+            _tcpClient?.Dispose();
+        }
+
+        private async void StartListen()
+        {
+            while(_tcpClient.Connected)
+            {
+                string message = await ReadMessageAsync();
+                CallOnMessage(message);
+            }
+        }
+
+        private void CallOnMessage(string message)
+        {
+            OnMessage?.Invoke(this, message);
         }
 
         public void JoinRoom(string channel)
@@ -50,12 +79,12 @@ namespace SimpleTwitchBot
 
         public void SendChatMessage(string message)
         {
-            SendIrcMessage(":" + _username + "!" + _username + "@" + _username + ".tmi.twitch.tv PRIVMSG #" + _channel + " :" + message);
+            SendIrcMessage($":{Username}!{Username}@{Username}.tmi.twitch.tv PRIVMSG #{_channel} : {message}");
         }
 
-        public string ReadMessage()
+        public async Task<string> ReadMessageAsync()
         {
-            string message = _inputStream.ReadLine();
+            string message = await _inputStream.ReadLineAsync();
             return message;
         }
     }

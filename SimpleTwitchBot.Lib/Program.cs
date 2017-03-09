@@ -9,23 +9,24 @@ namespace SimpleTwitchBot
         {
             const string channelName = "kappa";
 
-            var client = new IrcClient();
+            var client = new IrcClient("irc.twitch.tv", 6667);
+            client.OnMessage += Client_OnMessage;
             
-            var connectionTask = client.ConnectAsync("irc.twitch.tv", 6667, "username", "oauth:token");
+            var connectionTask = client.ConnectAsync("username", "oauth:token");
             Task.WaitAll(connectionTask);
             client.JoinRoom(channelName);
 
-            while (true)
-            {
-                string response = client.ReadMessage();
-                if (response.StartsWith("PING"))
-                {
-                    client.SendIrcMessage("PONG :tmi.twitch.tv");
-                    continue;
-                }
-                Console.WriteLine(response);
-            }
+            Console.ReadLine();
+            client.Disconnect();
+        }
 
+        private static void Client_OnMessage(IrcClient client, string message)
+        {
+            if (message.StartsWith("PING"))
+            {
+                client.SendIrcMessage("PONG :tmi.twitch.tv");
+            }
+            Console.WriteLine(message);
         }
     }
 }
