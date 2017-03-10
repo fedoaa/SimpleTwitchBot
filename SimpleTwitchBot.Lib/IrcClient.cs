@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using SimpleTwitchBot.Lib.Events;
 
 namespace SimpleTwitchBot
 {
@@ -11,19 +13,23 @@ namespace SimpleTwitchBot
         private readonly int _port;
         private readonly TcpClient _tcpClient;
 
-        public string Username { get; private set; }
+        public string Username { get; protected set; }
+        public List<string> JoinedChannels { get; protected set; }
 
-        private string _channel;
         private StreamReader _inputStream;
         private StreamWriter _outputStream;
 
-        public event Action<IrcClient, string> OnMessage;
+        public event EventHandler<OnIrcMessageArgs> OnMessage;
+        public event EventHandler<OnPingArgs> OnPing;
+        public event EventHandler<OnChannelJoinArgs> OnChannelJoin;
+        public event EventHandler<OnChannelPartArgs> OnChannelPart;
 
         public IrcClient(string ip, int port)
         {
             _ip = ip;
             _port = port;
             _tcpClient = new TcpClient();
+            JoinedChannels = new List<string>();
         }
 
         public async Task ConnectAsync(string username, string password)
@@ -44,31 +50,75 @@ namespace SimpleTwitchBot
 
         public void Disconnect()
         {
-            _tcpClient?.Dispose();
+            _tcpClient.Client.Shutdown(SocketShutdown.Both);
         }
 
         private async void StartListen()
         {
-            while(_tcpClient.Connected)
+            while (_tcpClient.Connected)
             {
                 string message = await ReadMessageAsync();
+                if (message == null)
+                {
+                    continue;
+                }
+                if (message.Contains("JOIN #"))
+                {
+                    string channel = message.Split('#')[1];
+                    CallOnChannelJoin(channel);
+                    continue;
+                }
+                if (message.Contains("PART #"))
+                {
+                    string channel = message.Split('#')[1];
+                    CallOnChannelPart(channel);
+                    continue;
+                }
+                if (message.StartsWith("PING"))
+                {
+                    string serverAddress = message.Split(' ')[1];
+                    CallOnPing(serverAddress);
+                    continue;
+                }
                 CallOnMessage(message);
             }
         }
 
-        private void CallOnMessage(string message)
+        private async Task<string> ReadMessageAsync()
         {
-            OnMessage?.Invoke(this, message);
+            return await _inputStream.ReadLineAsync();
         }
 
-        public void JoinRoom(string channel)
+        private void CallOnChannelJoin(string channel)
         {
-            _channel = channel;
+            JoinedChannels.Add(channel);
+            OnChannelJoin?.Invoke(this, new OnChannelJoinArgs { Channel = channel });
+        }
 
-            _outputStream.WriteLine("JOIN #" + channel);
-            _outputStream.WriteLine("CAP REQ :twitch.tv/tags");
-            _outputStream.WriteLine("CAP REQ :twitch.tv/commands");
-            _outputStream.Flush();
+        private void CallOnChannelPart(string channel)
+        {
+            JoinedChannels.Remove(channel);
+            OnChannelPart?.Invoke(this, new OnChannelPartArgs { Channel = channel });
+        }
+
+        private void CallOnPing(string serverAddress)
+        {
+            OnPing?.Invoke(this, new OnPingArgs { ServerAddress = serverAddress });
+        }
+
+        private void CallOnMessage(string message)
+        {
+            OnMessage?.Invoke(this, new OnIrcMessageArgs { Message = message });
+        }
+
+        public void JoinChannel(string channel)
+        {
+            SendIrcMessage($"JOIN #{channel}");
+        }
+
+        public void PartChannel(string channel)
+        {
+            SendIrcMessage($"PART #{channel}");
         }
 
         public void SendIrcMessage(string message)
@@ -77,15 +127,9 @@ namespace SimpleTwitchBot
             _outputStream.Flush();
         }
 
-        public void SendChatMessage(string message)
+        public void SendChatMessage(string channel, string message)
         {
-            SendIrcMessage($":{Username}!{Username}@{Username}.tmi.twitch.tv PRIVMSG #{_channel} : {message}");
-        }
-
-        public async Task<string> ReadMessageAsync()
-        {
-            string message = await _inputStream.ReadLineAsync();
-            return message;
+            SendIrcMessage($":{Username}!{Username}@{Username}.tmi.twitch.tv PRIVMSG #{channel} : {message}");
         }
     }
 }
