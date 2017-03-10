@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTwitchBot.Lib", "SimpleTwitchBot.Lib\SimpleTwitchBot.Lib.csproj", "{B6AC5EB5-66DF-4545-8EDB-0E2B553C1A62}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTwitchBot.ConsoleApp", "SimpleTwitchBot.ConsoleApp\SimpleTwitchBot.ConsoleApp.csproj", "{E4EEB699-3134-44FB-A1C2-C1CD6EEAEE6E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{B6AC5EB5-66DF-4545-8EDB-0E2B553C1A62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6AC5EB5-66DF-4545-8EDB-0E2B553C1A62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6AC5EB5-66DF-4545-8EDB-0E2B553C1A62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4EEB699-3134-44FB-A1C2-C1CD6EEAEE6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4EEB699-3134-44FB-A1C2-C1CD6EEAEE6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4EEB699-3134-44FB-A1C2-C1CD6EEAEE6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4EEB699-3134-44FB-A1C2-C1CD6EEAEE6E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

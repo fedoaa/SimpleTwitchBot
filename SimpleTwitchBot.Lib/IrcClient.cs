@@ -1,11 +1,11 @@
-﻿using System;
+﻿using SimpleTwitchBot.Lib.Events;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using SimpleTwitchBot.Lib.Events;
 
-namespace SimpleTwitchBot
+namespace SimpleTwitchBot.Lib
 {
     public class IrcClient
     {
@@ -19,7 +19,7 @@ namespace SimpleTwitchBot
         private StreamReader _inputStream;
         private StreamWriter _outputStream;
 
-        public event EventHandler<OnIrcMessageArgs> OnMessage;
+        public event EventHandler<OnIrcMessageArgs> OnIrcMessage;
         public event EventHandler<OnPingArgs> OnPing;
         public event EventHandler<OnChannelJoinArgs> OnChannelJoin;
         public event EventHandler<OnChannelPartArgs> OnChannelPart;
@@ -34,7 +34,7 @@ namespace SimpleTwitchBot
 
         public async Task ConnectAsync(string username, string password)
         {
-            Username = username;
+            Username = username.ToLower();
 
             await _tcpClient.ConnectAsync(_ip, _port);
             NetworkStream stream = _tcpClient.GetStream();
@@ -80,7 +80,7 @@ namespace SimpleTwitchBot
                     CallOnPing(serverAddress);
                     continue;
                 }
-                CallOnMessage(message);
+                CallOnIrcMessage(message);
             }
         }
 
@@ -106,9 +106,9 @@ namespace SimpleTwitchBot
             OnPing?.Invoke(this, new OnPingArgs { ServerAddress = serverAddress });
         }
 
-        private void CallOnMessage(string message)
+        private void CallOnIrcMessage(string message)
         {
-            OnMessage?.Invoke(this, new OnIrcMessageArgs { Message = message });
+            OnIrcMessage?.Invoke(this, new OnIrcMessageArgs { Message = message });
         }
 
         public void JoinChannel(string channel)
@@ -125,11 +125,6 @@ namespace SimpleTwitchBot
         {
             _outputStream.WriteLine(message);
             _outputStream.Flush();
-        }
-
-        public void SendChatMessage(string channel, string message)
-        {
-            SendIrcMessage($":{Username}!{Username}@{Username}.tmi.twitch.tv PRIVMSG #{channel} : {message}");
         }
     }
 }
