@@ -3,7 +3,7 @@ using System;
 
 namespace SimpleTwitchBot.Lib.Events
 {
-    public class OnUserMessageArgs : EventArgs
+    public class OnUserMessageReceivedArgs : EventArgs
     {
         public TwitchUserMessage Message { get; set; }
     }

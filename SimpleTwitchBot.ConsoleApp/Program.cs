@@ -7,33 +7,50 @@ namespace SimpleTwitchBot.ConsoleApp
 {
     class Program
     {
+        private static string channelName = "kappa";
+
+        private static TwitchIrcClient _client;
+
         static void Main(string[] args)
         {
-            const string channelName = "kappa";
+            _client = new TwitchIrcClient("irc.twitch.tv", 6667);
+            _client.OnConnect += Client_OnConnect;
+            _client.OnChannelJoin += Client_OnChannelJoin;
+            _client.OnIrcMessageReceived += Client_OnIrcMessageReceived;
+            _client.OnUserMessageReceived += Client_OnUserMessageReceived;
+            _client.OnDisconnect += Client_OnDisconnect;
 
-            var client = new TwitchIrcClient("irc.twitch.tv", 6667);
-            client.OnIrcMessage += Client_OnIrcMessage;
-            client.OnUserMessage += Client_OnUserMessage;
-
-            var connectionTask = client.ConnectAsync("username", "oauth:token");
+            var connectionTask = _client.ConnectAsync("username", "oauth:token");
             Task.WaitAll(connectionTask);
-            client.EnableMessageTags();
-            client.JoinChannel(channelName);
-
-            client.SendChatMessage(channelName, "hello, world");
-
+           
             Console.ReadLine();
-            client.Disconnect();
+            _client.Disconnect();
+            Console.ReadLine();
         }
 
-        private static void Client_OnIrcMessage(object sender, OnIrcMessageArgs e)
+        private static void Client_OnConnect(object sender, EventArgs e)
+        {
+            _client.JoinChannel(channelName);
+        }
+
+        private static void Client_OnChannelJoin(object sender, OnChannelJoinArgs e)
+        {
+            _client.SendChatMessage(e.Channel, "Keepo");
+        }
+
+        private static void Client_OnIrcMessageReceived(object sender, OnIrcMessageReceivedArgs e)
         {
             Console.WriteLine(e.Message);
         }
 
-        private static void Client_OnUserMessage(object sender, OnUserMessageArgs e)
+        private static void Client_OnUserMessageReceived(object sender, OnUserMessageReceivedArgs e)
         {
             Console.WriteLine(e.Message);
+        }
+
+        private static void Client_OnDisconnect(object sender, EventArgs e)
+        {
+            Console.WriteLine("Disconnected");
         }
     }
 }

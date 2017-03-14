@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Events
 {
-    public class OnIrcMessageArgs : EventArgs
+    public class OnIrcMessageReceivedArgs : EventArgs
     {
         public string Message { get; set; }
     }

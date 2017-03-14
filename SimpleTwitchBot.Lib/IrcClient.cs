@@ -15,11 +15,14 @@ namespace SimpleTwitchBot.Lib
 
         public string Username { get; protected set; }
         public List<string> JoinedChannels { get; protected set; }
+        public bool IsConnected { get; protected set; }
 
         private StreamReader _inputStream;
         private StreamWriter _outputStream;
 
-        public event EventHandler<OnIrcMessageArgs> OnIrcMessage;
+        public event EventHandler OnConnect;
+        public event EventHandler OnDisconnect;
+        public event EventHandler<OnIrcMessageReceivedArgs> OnIrcMessageReceived;
         public event EventHandler<OnPingArgs> OnPing;
         public event EventHandler<OnChannelJoinArgs> OnChannelJoin;
         public event EventHandler<OnChannelPartArgs> OnChannelPart;
@@ -30,6 +33,7 @@ namespace SimpleTwitchBot.Lib
             _port = port;
             _tcpClient = new TcpClient();
             JoinedChannels = new List<string>();
+            IsConnected = false;
         }
 
         public async Task ConnectAsync(string username, string password)
@@ -37,6 +41,7 @@ namespace SimpleTwitchBot.Lib
             Username = username.ToLower();
 
             await _tcpClient.ConnectAsync(_ip, _port);
+
             NetworkStream stream = _tcpClient.GetStream();
             _inputStream = new StreamReader(stream);
             _outputStream = new StreamWriter(stream);
@@ -62,6 +67,11 @@ namespace SimpleTwitchBot.Lib
                 {
                     continue;
                 }
+                if (!IsConnected && message.Contains("001"))
+                {
+                    CallOnConnect();
+                    continue;
+                }
                 if (message.Contains("JOIN #"))
                 {
                     string channel = message.Split('#')[1];
@@ -80,13 +90,20 @@ namespace SimpleTwitchBot.Lib
                     CallOnPing(serverAddress);
                     continue;
                 }
-                CallOnIrcMessage(message);
+                CallOnIrcMessageReceived(message);
             }
+            CallOnDisconnect();
         }
 
         private async Task<string> ReadMessageAsync()
         {
             return await _inputStream.ReadLineAsync();
+        }
+
+        private void CallOnConnect()
+        {
+            IsConnected = true;
+            OnConnect?.Invoke(this, EventArgs.Empty);
         }
 
         private void CallOnChannelJoin(string channel)
@@ -106,18 +123,26 @@ namespace SimpleTwitchBot.Lib
             OnPing?.Invoke(this, new OnPingArgs { ServerAddress = serverAddress });
         }
 
-        private void CallOnIrcMessage(string message)
+        private void CallOnIrcMessageReceived(string message)
         {
-            OnIrcMessage?.Invoke(this, new OnIrcMessageArgs { Message = message });
+            OnIrcMessageReceived?.Invoke(this, new OnIrcMessageReceivedArgs { Message = message });
+        }
+
+        private void CallOnDisconnect()
+        {
+            IsConnected = false;
+            OnDisconnect?.Invoke(this, EventArgs.Empty);
         }
 
         public void JoinChannel(string channel)
         {
+            channel = channel.ToLower();
             SendIrcMessage($"JOIN #{channel}");
         }
 
         public void PartChannel(string channel)
         {
+            channel = channel.ToLower();
             SendIrcMessage($"PART #{channel}");
         }
 
