@@ -1,4 +1,5 @@
 ﻿using SimpleTwitchBot.Lib.Events;
+using SimpleTwitchBot.Lib.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -67,30 +68,26 @@ namespace SimpleTwitchBot.Lib
                 {
                     continue;
                 }
-                if (!IsConnected && message.Contains("001"))
+
+                var ircMessage = IrcMessage.Parse(message);
+                switch (ircMessage.Command)
                 {
-                    CallOnConnect();
-                    continue;
+                    case "001":
+                        CallOnConnect();
+                        break;
+                    case "JOIN":
+                        CallOnChannelJoin(channel: ircMessage.Params[0]);
+                        break;
+                    case "PART":
+                        CallOnChannelPart(channel: ircMessage.Params[0]);
+                        break;
+                    case "PING":
+                        CallOnPing(serverAddress: ircMessage.Params[0]);
+                        break;
+                    default:
+                        CallOnIrcMessageReceived(ircMessage);
+                        break;
                 }
-                if (message.Contains("JOIN #"))
-                {
-                    string channel = message.Split('#')[1];
-                    CallOnChannelJoin(channel);
-                    continue;
-                }
-                if (message.Contains("PART #"))
-                {
-                    string channel = message.Split('#')[1];
-                    CallOnChannelPart(channel);
-                    continue;
-                }
-                if (message.StartsWith("PING"))
-                {
-                    string serverAddress = message.Split(' ')[1];
-                    CallOnPing(serverAddress);
-                    continue;
-                }
-                CallOnIrcMessageReceived(message);
             }
             CallOnDisconnect();
         }
@@ -123,7 +120,7 @@ namespace SimpleTwitchBot.Lib
             OnPing?.Invoke(this, new OnPingArgs { ServerAddress = serverAddress });
         }
 
-        private void CallOnIrcMessageReceived(string message)
+        private void CallOnIrcMessageReceived(IrcMessage message)
         {
             OnIrcMessageReceived?.Invoke(this, new OnIrcMessageReceivedArgs { Message = message });
         }
@@ -137,13 +134,13 @@ namespace SimpleTwitchBot.Lib
         public void JoinChannel(string channel)
         {
             channel = channel.ToLower();
-            SendIrcMessage($"JOIN #{channel}");
+            SendIrcMessage($"JOIN {channel}");
         }
 
         public void PartChannel(string channel)
         {
             channel = channel.ToLower();
-            SendIrcMessage($"PART #{channel}");
+            SendIrcMessage($"PART {channel}");
         }
 
         public void SendIrcMessage(string message)

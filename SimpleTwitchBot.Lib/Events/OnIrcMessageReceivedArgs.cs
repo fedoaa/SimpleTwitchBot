@@ -1,9 +1,10 @@
-﻿using System;
+﻿using SimpleTwitchBot.Lib.Models;
+using System;
 
 namespace SimpleTwitchBot.Lib.Events
 {
     public class OnIrcMessageReceivedArgs : EventArgs
     {
-        public string Message { get; set; }
+        public IrcMessage Message { get; set; }
     }
 }

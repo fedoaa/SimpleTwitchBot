@@ -7,7 +7,7 @@ namespace SimpleTwitchBot.ConsoleApp
 {
     class Program
     {
-        private static string channelName = "kappa";
+        private static string channelName = "#kappa";
 
         private static TwitchIrcClient _client;
 
@@ -40,7 +40,7 @@ namespace SimpleTwitchBot.ConsoleApp
 
         private static void Client_OnIrcMessageReceived(object sender, OnIrcMessageReceivedArgs e)
         {
-            Console.WriteLine(e.Message);
+            Console.WriteLine(e.Message.Raw);
         }
 
         private static void Client_OnUserMessageReceived(object sender, OnUserMessageReceivedArgs e)
