@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SimpleTwitchBot.Lib.Models
 {
@@ -16,15 +17,20 @@ namespace SimpleTwitchBot.Lib.Models
 
         public static IrcMessage Parse(string message)
         {
-            var ircMessage = new IrcMessage();
-            ircMessage.Raw = message;
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                throw new ArgumentNullException(message);
+            }
+
+            var ircMessage = new IrcMessage { Raw = message };
+            int position = 0;
             
             bool hasTags = message.StartsWith("@");
             if (hasTags)
             {
                 var ircMessageTags = new List<IrcMessageTag>();
 
-                int endOfTags = message.IndexOf(" ");
+                int endOfTags = message.IndexOf(' ');
                 string[] messageTags = message.Substring(1, endOfTags - 1).Split(';');
 
                 for (int i = 0; i < messageTags.Length; i++)
@@ -38,29 +44,32 @@ namespace SimpleTwitchBot.Lib.Models
                     ircMessageTags.Add(messageTag);
                 }
                 ircMessage.Tags = ircMessageTags;
-                message = message.Remove(0, endOfTags + 1);
+                position = endOfTags + 1;
             }
-            bool hasPrefix = message.StartsWith(":");
+            bool hasPrefix = message[position].Equals(':');
             if (hasPrefix)
             {
-                int endOfPrefix = message.IndexOf(' ');
-                string prefix = message.Substring(1, endOfPrefix - 1);
+                int endOfPrefix = message.IndexOf(' ', position);
+                int lengthOfPrefix = endOfPrefix - position - 1;
+                string prefix = message.Substring(position + 1, lengthOfPrefix);
 
                 ircMessage.Prefix = prefix;
-                message = message.Remove(0, endOfPrefix + 1);
+                position = endOfPrefix + 1;
             }
-            int endOfCommand = message.IndexOf(' ');
+            int endOfCommand = message.IndexOf(' ', position);
             if (endOfCommand != -1)
             {
-                ircMessage.Command = message.Substring(0, endOfCommand);
-                message = message.Remove(0, endOfCommand + 1);
+                int lengthOfCommand = endOfCommand - position;
+                ircMessage.Command = message.Substring(position, lengthOfCommand);
+                position = endOfCommand + 1;
 
                 var ircMessageParams = new List<string>();
                 
-                int startOfTrailing = message.IndexOf(':');
+                int startOfTrailing = message.IndexOf(':', position);
                 if (startOfTrailing != -1)
                 {
-                    string middle = message.Substring(0, startOfTrailing - 1);
+                    int lengthOfMiddle = startOfTrailing - position - 1;
+                    string middle = message.Substring(position, lengthOfMiddle);
                     string trailing = message.Substring(startOfTrailing + 1);
 
                     ircMessageParams.AddRange(middle.Split(' '));
@@ -68,13 +77,14 @@ namespace SimpleTwitchBot.Lib.Models
                 }
                 else
                 {
-                    ircMessageParams.AddRange(message.Split(' '));
+                    string middle = message.Substring(position);
+                    ircMessageParams.AddRange(middle.Split(' '));
                 }
                 ircMessage.Params = ircMessageParams;
             }
             else
             {
-                ircMessage.Command = message;
+                ircMessage.Command = message.Substring(position);
             }
             return ircMessage;
         }
