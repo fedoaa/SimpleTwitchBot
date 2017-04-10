@@ -11,18 +11,19 @@ namespace SimpleTwitchBot.ConsoleApp
 
         private static TwitchIrcClient _client;
 
-        static void Main(string[] args)
+        static void Main(string[] args) => MainAsync().GetAwaiter().GetResult();
+
+        public static async Task MainAsync()
         {
             _client = new TwitchIrcClient("irc.twitch.tv", 6667);
             _client.OnConnect += Client_OnConnect;
             _client.OnChannelJoin += Client_OnChannelJoin;
             _client.OnIrcMessageReceived += Client_OnIrcMessageReceived;
-            _client.OnUserMessageReceived += Client_OnUserMessageReceived;
+            _client.OnChatMessageReceived += Client_OnChatMessageReceived;
             _client.OnDisconnect += Client_OnDisconnect;
 
-            var connectionTask = _client.ConnectAsync("username", "oauth:token");
-            Task.WaitAll(connectionTask);
-           
+            await _client.ConnectAsync("username", "oauth:token");
+
             Console.ReadLine();
             _client.Disconnect();
             Console.ReadLine();
@@ -43,9 +44,9 @@ namespace SimpleTwitchBot.ConsoleApp
             Console.WriteLine(e.Message.Raw);
         }
 
-        private static void Client_OnUserMessageReceived(object sender, OnUserMessageReceivedArgs e)
+        private static void Client_OnChatMessageReceived(object sender, OnChatMessageReceivedArgs e)
         {
-            Console.WriteLine(e.Message);
+            Console.WriteLine($"[{e.Message.Timestamp}] {e.Message.Username}: {e.Message.Body}");
         }
 
         private static void Client_OnDisconnect(object sender, EventArgs e)

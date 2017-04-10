@@ -5,7 +5,7 @@ namespace SimpleTwitchBot.Lib.Models
 {
     public class IrcMessage
     {
-        public List<IrcMessageTag> Tags { get; set; }
+        public Dictionary<string, string> Tags { get; set; }
 
         public string Prefix { get; set; }
 
@@ -28,7 +28,7 @@ namespace SimpleTwitchBot.Lib.Models
             bool hasTags = message.StartsWith("@");
             if (hasTags)
             {
-                var ircMessageTags = new List<IrcMessageTag>();
+                var ircMessageTags = new Dictionary<string, string>();
 
                 int endOfTags = message.IndexOf(' ');
                 string[] messageTags = message.Substring(1, endOfTags - 1).Split(';');
@@ -36,12 +36,9 @@ namespace SimpleTwitchBot.Lib.Models
                 for (int i = 0; i < messageTags.Length; i++)
                 {
                     string[] tagData = messageTags[i].Split('=');
-                    var messageTag = new IrcMessageTag
-                    {
-                        Name = tagData[0],
-                        Value = tagData[1]
-                    };
-                    ircMessageTags.Add(messageTag);
+                    string tagName = tagData[0], tagValue = tagData[1];
+
+                    ircMessageTags.Add(tagName, tagValue);
                 }
                 ircMessage.Tags = ircMessageTags;
                 position = endOfTags + 1;
@@ -69,10 +66,13 @@ namespace SimpleTwitchBot.Lib.Models
                 if (startOfTrailing != -1)
                 {
                     int lengthOfMiddle = startOfTrailing - position - 1;
-                    string middle = message.Substring(position, lengthOfMiddle);
+                    if (lengthOfMiddle > 0)
+                    {
+                        string middle = message.Substring(position, lengthOfMiddle);
+                        ircMessageParams.AddRange(middle.Split(' '));
+                    }
+                    
                     string trailing = message.Substring(startOfTrailing + 1);
-
-                    ircMessageParams.AddRange(middle.Split(' '));
                     ircMessageParams.Add(trailing);
                 }
                 else

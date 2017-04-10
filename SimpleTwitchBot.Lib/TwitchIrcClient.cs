@@ -6,7 +6,8 @@ namespace SimpleTwitchBot.Lib
 {
     public class TwitchIrcClient : IrcClient
     {
-        public event EventHandler<OnUserMessageReceivedArgs> OnUserMessageReceived;
+        public event EventHandler<OnChatMessageReceivedArgs> OnChatMessageReceived;
+        public event EventHandler<OnWhisperMessageReceivedArgs> OnWhisperMessageReceived;
 
         public TwitchIrcClient(string ip, int port) : base(ip, port)
         {
@@ -33,17 +34,32 @@ namespace SimpleTwitchBot.Lib
 
         private void Client_OnIrcMessageReceived(object sender, OnIrcMessageReceivedArgs e)
         {
-            
+            switch(e.Message.Command)
+            {
+                case "PRIVMGS":
+                    var chatMessage = new TwitchChatMessage(e.Message);
+                    CallOnChatMessageReceived(chatMessage);
+                    break;
+                case "WHISPER":
+                    var whisperMessage = new TwitchWhisperMessage(e.Message);
+                    CallOnWhisperMessageReceived(whisperMessage);
+                    break;
+            }
+        }
+
+        private void CallOnChatMessageReceived(TwitchChatMessage message)
+        {
+            OnChatMessageReceived?.Invoke(this, new OnChatMessageReceivedArgs { Message = message });
+        }
+
+        private void CallOnWhisperMessageReceived(TwitchWhisperMessage message)
+        {
+            OnWhisperMessageReceived?.Invoke(this, new OnWhisperMessageReceivedArgs { Message = message });
         }
 
         public void SendChatMessage(string channel, string message)
         {
-            SendIrcMessage($":{Username}!{Username}@{Username}.tmi.twitch.tv PRIVMSG #{channel} : {message}");
-        }
-
-        private void CallOnUserMessageReceived(string channel, TwitchUserMessage message)
-        {
-            OnUserMessageReceived?.Invoke(this, new OnUserMessageReceivedArgs { Message = message });
+            SendIrcMessage($":{Username}!{Username}@{Username}.tmi.twitch.tv PRIVMSG {channel} :{message}");
         }
     }
 }
