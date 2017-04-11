@@ -36,7 +36,7 @@ namespace SimpleTwitchBot.Lib
         {
             switch(e.Message.Command)
             {
-                case "PRIVMGS":
+                case "PRIVMSG":
                     var chatMessage = new TwitchChatMessage(e.Message);
                     CallOnChatMessageReceived(chatMessage);
                     break;
