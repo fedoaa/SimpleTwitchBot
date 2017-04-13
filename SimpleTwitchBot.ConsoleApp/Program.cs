@@ -17,7 +17,7 @@ namespace SimpleTwitchBot.ConsoleApp
         {
             _client = new TwitchIrcClient("irc.twitch.tv", 6667);
             _client.OnConnect += Client_OnConnect;
-            _client.OnChannelJoin += Client_OnChannelJoin;
+            _client.OnChannelJoined += Client_OnChannelJoined;
             _client.OnIrcMessageReceived += Client_OnIrcMessageReceived;
             _client.OnChatMessageReceived += Client_OnChatMessageReceived;
             _client.OnDisconnect += Client_OnDisconnect;
@@ -34,7 +34,7 @@ namespace SimpleTwitchBot.ConsoleApp
             _client.JoinChannel(channelName);
         }
 
-        private static void Client_OnChannelJoin(object sender, OnChannelJoinArgs e)
+        private static void Client_OnChannelJoined(object sender, OnChannelJoinedArgs e)
         {
             _client.SendChatMessage(e.Channel, "Keepo");
         }
@@ -46,7 +46,7 @@ namespace SimpleTwitchBot.ConsoleApp
 
         private static void Client_OnChatMessageReceived(object sender, OnChatMessageReceivedArgs e)
         {
-            Console.WriteLine($"[{e.Message.Timestamp}] {e.Message.Username}: {e.Message.Body}");
+            Console.WriteLine($"{e.Message.Username}: {e.Message.Body}");
         }
 
         private static void Client_OnDisconnect(object sender, EventArgs e)

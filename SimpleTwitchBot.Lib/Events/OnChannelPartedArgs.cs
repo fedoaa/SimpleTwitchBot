@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Events
 {
-    public class OnChannelJoinArgs : EventArgs
+    public class OnChannelPartedArgs : EventArgs
     {
         public string Channel { get; set; }
     }

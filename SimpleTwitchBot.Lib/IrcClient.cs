@@ -25,8 +25,8 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler OnDisconnect;
         public event EventHandler<OnIrcMessageReceivedArgs> OnIrcMessageReceived;
         public event EventHandler<OnPingArgs> OnPing;
-        public event EventHandler<OnChannelJoinArgs> OnChannelJoin;
-        public event EventHandler<OnChannelPartArgs> OnChannelPart;
+        public event EventHandler<OnChannelJoinedArgs> OnChannelJoined;
+        public event EventHandler<OnChannelPartedArgs> OnChannelParted;
 
         public IrcClient(string ip, int port)
         {
@@ -76,10 +76,10 @@ namespace SimpleTwitchBot.Lib
                         CallOnConnect();
                         break;
                     case "JOIN":
-                        CallOnChannelJoin(channel: ircMessage.Params[0]);
+                        CallOnChannelJoined(channel: ircMessage.Params[0]);
                         break;
                     case "PART":
-                        CallOnChannelPart(channel: ircMessage.Params[0]);
+                        CallOnChannelParted(channel: ircMessage.Params[0]);
                         break;
                     case "PING":
                         CallOnPing(serverAddress: ircMessage.Params[0]);
@@ -103,16 +103,16 @@ namespace SimpleTwitchBot.Lib
             OnConnect?.Invoke(this, EventArgs.Empty);
         }
 
-        private void CallOnChannelJoin(string channel)
+        private void CallOnChannelJoined(string channel)
         {
             JoinedChannels.Add(channel);
-            OnChannelJoin?.Invoke(this, new OnChannelJoinArgs { Channel = channel });
+            OnChannelJoined?.Invoke(this, new OnChannelJoinedArgs { Channel = channel });
         }
 
-        private void CallOnChannelPart(string channel)
+        private void CallOnChannelParted(string channel)
         {
             JoinedChannels.Remove(channel);
-            OnChannelPart?.Invoke(this, new OnChannelPartArgs { Channel = channel });
+            OnChannelParted?.Invoke(this, new OnChannelPartedArgs { Channel = channel });
         }
 
         private void CallOnPing(string serverAddress)
