@@ -8,6 +8,8 @@ namespace SimpleTwitchBot.Lib
     {
         public event EventHandler<OnChatMessageReceivedArgs> OnChatMessageReceived;
         public event EventHandler<OnWhisperMessageReceivedArgs> OnWhisperMessageReceived;
+        public event EventHandler<OnChannelStateChangedArgs> OnChannelStateChanged;
+        public event EventHandler<OnUserStateReceivedArgs> OnUserStateReceived;
 
         public TwitchIrcClient(string ip, int port) : base(ip, port)
         {
@@ -17,11 +19,6 @@ namespace SimpleTwitchBot.Lib
         }
 
         private void TwitchIrcClient_OnConnect(object sender, EventArgs e)
-        {
-            EnableMessageTags();
-        }
-
-        private void EnableMessageTags()
         {
             SendIrcMessage("CAP REQ :twitch.tv/tags");
             SendIrcMessage("CAP REQ :twitch.tv/commands");
@@ -44,6 +41,14 @@ namespace SimpleTwitchBot.Lib
                     var whisperMessage = new TwitchWhisperMessage(e.Message);
                     CallOnWhisperMessageReceived(whisperMessage);
                     break;
+                case "ROOMSTATE":
+                    var channelState = new TwitchChannelState(e.Message);
+                    CallOnChannelStateChanged(channelState);
+                    break;
+                case "USERSTATE":
+                    var userState = new TwitchUserState(e.Message);
+                    CallOnUserStateReceived(userState);
+                    break;
             }
         }
 
@@ -55,6 +60,16 @@ namespace SimpleTwitchBot.Lib
         private void CallOnWhisperMessageReceived(TwitchWhisperMessage message)
         {
             OnWhisperMessageReceived?.Invoke(this, new OnWhisperMessageReceivedArgs { Message = message });
+        }
+
+        private void CallOnChannelStateChanged(TwitchChannelState channelState)
+        {
+            OnChannelStateChanged?.Invoke(this, new OnChannelStateChangedArgs { ChannelState = channelState });
+        }
+
+        private void CallOnUserStateReceived(TwitchUserState userState)
+        {
+            OnUserStateReceived?.Invoke(this, new OnUserStateReceivedArgs { UserState = userState });
         }
 
         public void SendChatMessage(string channel, string message)
