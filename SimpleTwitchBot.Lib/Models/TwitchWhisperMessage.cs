@@ -22,7 +22,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string Body { get; set; }
 
-        public string Badges { get; set; }
+        public IDictionary<string, string> Badges { get; set; }
 
         public string ThreadId { get; set; }
 
@@ -33,7 +33,7 @@ namespace SimpleTwitchBot.Lib.Models
                 switch (tag.Key)
                 {
                     case "badges":
-                        Badges = tag.Value;
+                        Badges = ParseBadges(tag.Value);
                         break;
                     case "color":
                         UserColor = tag.Value;

@@ -29,9 +29,9 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string Body { get; set; }
 
-        public string Badges { get; set; }
+        public IDictionary<string, string> Badges { get; set; }
 
-        public string RoomId { get; set; }
+        public string ChannelId { get; set; }
 
         public int Bits { get; set; }
 
@@ -46,7 +46,7 @@ namespace SimpleTwitchBot.Lib.Models
                 switch (tag.Key)
                 {
                     case "badges":
-                        Badges = tag.Value;
+                        Badges = ParseBadges(tag.Value);
                         break;
                     case "color":
                         UserColor = tag.Value;
@@ -64,7 +64,7 @@ namespace SimpleTwitchBot.Lib.Models
                         Moderator = tag.Value.Equals("1");
                         break;
                     case "room-id":
-                        RoomId = tag.Value;
+                        ChannelId = tag.Value;
                         break;
                     case "tmi-sent-ts":
                         Timestamp = long.Parse(tag.Value);

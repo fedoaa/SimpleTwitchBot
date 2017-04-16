@@ -5,15 +5,20 @@ namespace SimpleTwitchBot.Lib.Models
 {
     public class IrcMessage
     {
-        public Dictionary<string, string> Tags { get; set; }
+        public IDictionary<string, string> Tags { get; set; }
 
         public string Prefix { get; set; }
 
         public string Command { get; set; }
 
-        public List<string> Params { get; set; }
+        public IList<string> Params { get; set; }
 
         public string Raw { get; set; }
+
+        public IrcMessage()
+        {
+            Tags = new Dictionary<string, string>();
+        }
 
         public static IrcMessage Parse(string message)
         {
@@ -28,8 +33,6 @@ namespace SimpleTwitchBot.Lib.Models
             bool hasTags = message.StartsWith("@");
             if (hasTags)
             {
-                var ircMessageTags = new Dictionary<string, string>();
-
                 int endOfTags = message.IndexOf(' ');
                 string[] messageTags = message.Substring(1, endOfTags - 1).Split(';');
 
@@ -38,9 +41,8 @@ namespace SimpleTwitchBot.Lib.Models
                     string[] tagData = messageTags[i].Split('=');
                     string tagName = tagData[0], tagValue = tagData[1];
 
-                    ircMessageTags.Add(tagName, tagValue);
+                    ircMessage.Tags.Add(tagName, tagValue);
                 }
-                ircMessage.Tags = ircMessageTags;
                 position = endOfTags + 1;
             }
             bool hasPrefix = message[position].Equals(':');

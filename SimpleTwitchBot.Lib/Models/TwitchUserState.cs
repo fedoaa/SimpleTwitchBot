@@ -14,9 +14,9 @@ namespace SimpleTwitchBot.Lib.Models
 
         public TwitchUserType UserType { get; set; }
 
-        public string Emotesets { get; set; }
+        public IList<string> Emotesets { get; set; }
 
-        public string Badges { get; set; }
+        public IDictionary<string, string> Badges { get; set; }
 
         public string Channel { get; set; }
 
@@ -27,7 +27,7 @@ namespace SimpleTwitchBot.Lib.Models
                 switch (tag.Key)
                 {
                     case "badges":
-                        Badges = tag.Value;
+                        Badges = ParseBadges(tag.Value);
                         break;
                     case "color":
                         UserColor = tag.Value;
@@ -36,7 +36,7 @@ namespace SimpleTwitchBot.Lib.Models
                         DisplayName = tag.Value;
                         break;
                     case "emote-sets":
-                        Emotesets = tag.Value;
+                        Emotesets = tag.Value.Split(',');
                         break;
                     case "mod":
                         Moderator = tag.Value.Equals("1");
