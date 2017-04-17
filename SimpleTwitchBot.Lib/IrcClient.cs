@@ -148,5 +148,10 @@ namespace SimpleTwitchBot.Lib
             _outputStream.WriteLine(message);
             _outputStream.Flush();
         }
+
+        public void SendChatMessage(string target, string message)
+        {
+            SendIrcMessage($"PRIVMSG {target} :{message}");
+        }
     }
 }

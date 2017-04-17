@@ -72,9 +72,9 @@ namespace SimpleTwitchBot.Lib
             OnUserStateReceived?.Invoke(this, new OnUserStateReceivedArgs { UserState = userState });
         }
 
-        public void SendChatMessage(string channel, string message)
+        public void SendWhisperMessage(string username, string message)
         {
-            SendIrcMessage($":{Username}!{Username}@{Username}.tmi.twitch.tv PRIVMSG {channel} :{message}");
+            SendIrcMessage($"PRIVMSG #jtv :/w {username} {message}");
         }
     }
 }
