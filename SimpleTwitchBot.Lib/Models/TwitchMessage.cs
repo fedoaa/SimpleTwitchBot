@@ -16,8 +16,9 @@ namespace SimpleTwitchBot.Lib.Models
                     return TwitchUserType.Admin;
                 case "staff":
                     return TwitchUserType.Staff;
+                default:
+                    return TwitchUserType.Viewer;
             }
-            return TwitchUserType.Viewer;
         }
 
         protected Dictionary<string, string> ParseBadges(string tagValue)

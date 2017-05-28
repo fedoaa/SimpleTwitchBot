@@ -10,6 +10,7 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler<OnWhisperMessageReceivedArgs> OnWhisperMessageReceived;
         public event EventHandler<OnChannelStateChangedArgs> OnChannelStateChanged;
         public event EventHandler<OnUserStateReceivedArgs> OnUserStateReceived;
+        public event EventHandler<OnUserSubscribedArgs> OnUserSubscribed;
 
         public TwitchIrcClient(string ip, int port) : base(ip, port)
         {
@@ -49,6 +50,10 @@ namespace SimpleTwitchBot.Lib
                     var userState = new TwitchUserState(e.Message);
                     CallOnUserStateReceived(userState);
                     break;
+                case "USERNOTICE":
+                    var subscription = new TwitchSubscription(e.Message);
+                    CallOnUserSubscribed(subscription);
+                    break;
             }
         }
 
@@ -70,6 +75,11 @@ namespace SimpleTwitchBot.Lib
         private void CallOnUserStateReceived(TwitchUserState userState)
         {
             OnUserStateReceived?.Invoke(this, new OnUserStateReceivedArgs { UserState = userState });
+        }
+
+        private void CallOnUserSubscribed(TwitchSubscription subscription)
+        {
+            OnUserSubscribed?.Invoke(this, new OnUserSubscribedArgs { Subscription = subscription });
         }
 
         public void SendWhisperMessage(string username, string message)

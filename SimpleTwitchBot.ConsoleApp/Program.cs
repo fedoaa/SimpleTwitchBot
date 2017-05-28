@@ -7,7 +7,7 @@ namespace SimpleTwitchBot.ConsoleApp
 {
     class Program
     {
-        private static string channelName = "#kappa";
+        private static string channelName = "#channelName";
 
         private static TwitchIrcClient _client;
 
@@ -20,6 +20,7 @@ namespace SimpleTwitchBot.ConsoleApp
             _client.OnChannelJoined += Client_OnChannelJoined;
             _client.OnIrcMessageReceived += Client_OnIrcMessageReceived;
             _client.OnChatMessageReceived += Client_OnChatMessageReceived;
+            _client.OnUserSubscribed += Client_OnUserSubscribed;
             _client.OnDisconnect += Client_OnDisconnect;
 
             await _client.ConnectAsync("username", "oauth:token");
@@ -47,6 +48,11 @@ namespace SimpleTwitchBot.ConsoleApp
         private static void Client_OnChatMessageReceived(object sender, OnChatMessageReceivedArgs e)
         {
             Console.WriteLine($"{e.Message.Username}: {e.Message.Body}");
+        }
+
+        private static void Client_OnUserSubscribed(object sender, OnUserSubscribedArgs e)
+        {
+            Console.WriteLine($"{e.Subscription.Username} just subscribed!");
         }
 
         private static void Client_OnDisconnect(object sender, EventArgs e)
