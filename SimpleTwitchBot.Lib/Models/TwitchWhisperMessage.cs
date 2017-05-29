@@ -4,27 +4,27 @@ namespace SimpleTwitchBot.Lib.Models
 {
     public class TwitchWhisperMessage : TwitchMessage
     {
+        public IDictionary<string, string> Badges { get; set; }
+
+        public string Body { get; set; }
+
+        public string DisplayName { get; set; }
+
+        public string Emotes { get; set; }
+
+        public bool IsTurbo { get; set; }
+
         public string MessageId { get; set; }
+
+        public string ThreadId { get; set; }
+
+        public string UserColor { get; set; }
 
         public string UserId { get; set; }
 
         public string Username { get; set; }
 
-        public string DisplayName { get; set; }
-
-        public string UserColor { get; set; }
-
-        public bool Turbo { get; set; }
-
         public TwitchUserType UserType { get; set; }
-
-        public string Emotes { get; set; }
-
-        public string Body { get; set; }
-
-        public IDictionary<string, string> Badges { get; set; }
-
-        public string ThreadId { get; set; }
 
         public TwitchWhisperMessage(IrcMessage message)
         {
@@ -51,7 +51,7 @@ namespace SimpleTwitchBot.Lib.Models
                         ThreadId = tag.Value;
                         break;
                     case "turbo":
-                        Turbo = tag.Value.Equals("1");
+                        IsTurbo = tag.Value.Equals("1");
                         break;
                     case "user-id":
                         UserId = tag.Value;

@@ -6,17 +6,19 @@ namespace SimpleTwitchBot.Lib.Models
     {
         public string BroadcasterLanguage { get; set; }
 
-        public bool EmoteOnly { get; set; }
-
-        public int FollowersOnly { get; set; }
-
-        public bool R9k { get; set; }
-
-        public bool SlowMode { get; set; }
-
-        public bool SubOnly { get; set; }
-
         public string Channel { get; set; }
+
+        public int FollowersOnlyMinutes { get; set; }
+
+        public bool IsFollowersOnly => FollowersOnlyMinutes != -1;
+
+        public bool IsEmoteOnly { get; set; }
+
+        public bool IsR9k { get; set; }
+
+        public bool IsSlowMode { get; set; }
+
+        public bool IsSubOnly { get; set; }
 
         public TwitchChannelState(IrcMessage message)
         {
@@ -28,19 +30,19 @@ namespace SimpleTwitchBot.Lib.Models
                         BroadcasterLanguage = tag.Value;
                         break;
                     case "emote-only":
-                        EmoteOnly = tag.Value.Equals("1");
+                        IsEmoteOnly = tag.Value.Equals("1");
                         break;
                     case "followers-only":
-                        FollowersOnly = int.Parse(tag.Value);
+                        FollowersOnlyMinutes = int.Parse(tag.Value);
                         break;
                     case "r9k":
-                        R9k = tag.Value.Equals("1");
+                        IsR9k = tag.Value.Equals("1");
                         break;
                     case "slow":
-                        SlowMode = tag.Value.Equals("1");
+                        IsSlowMode = tag.Value.Equals("1");
                         break;
                     case "subs-only":
-                        SubOnly = tag.Value.Equals("1");
+                        IsSubOnly = tag.Value.Equals("1");
                         break;
                 }
             }

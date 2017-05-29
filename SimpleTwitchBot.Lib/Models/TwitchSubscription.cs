@@ -16,15 +16,17 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string Emotes { get; set; }
 
-        public bool Moderator { get; set; }
+        public bool IsModerator { get; set; }
+
+        public bool IsSubscriber { get; set; }
+
+        public bool IsTurbo { get; set; }
 
         public string MessageId { get; set; }
 
         public int Months { get; set; }
 
         public TwitchSubscriptionType SubscriptionType { get; set; }
-
-        public bool Subscriber { get; set; }
 
         public string SubscriptionPlanName { get; set; }
 
@@ -34,13 +36,11 @@ namespace SimpleTwitchBot.Lib.Models
 
         public long Timestamp { get; set; }
 
-        public bool Turbo { get; set; }
-
         public string UserColor { get; set; }
 
-        public string Username { get; set; }
-
         public string UserId { get; set; }
+
+        public string Username { get; set; }
 
         public TwitchUserType UserType { get; set; }
 
@@ -72,7 +72,7 @@ namespace SimpleTwitchBot.Lib.Models
                         Body = tag.Value;
                         break;
                     case "mod":
-                        Moderator = tag.Value.Equals("1");
+                        IsModerator = tag.Value.Equals("1");
                         break;
                     case "msg-id":
                         SubscriptionType = ConvertToSubscriptionType(tag.Value);
@@ -90,7 +90,7 @@ namespace SimpleTwitchBot.Lib.Models
                         ChannelId = tag.Value;
                         break;
                     case "subscriber":
-                        Subscriber = tag.Value.Equals("1");
+                        IsSubscriber = tag.Value.Equals("1");
                         break;
                     case "system-msg":
                         SystemMessage = tag.Value.Replace("\\s", " ");
@@ -99,7 +99,7 @@ namespace SimpleTwitchBot.Lib.Models
                         Timestamp = long.Parse(tag.Value);
                         break;
                     case "turbo":
-                        Turbo = tag.Value.Equals("1");
+                        IsTurbo = tag.Value.Equals("1");
                         break;
                     case "user-id":
                         UserId = tag.Value;

@@ -5,39 +5,39 @@ namespace SimpleTwitchBot.Lib.Models
 {
     public class TwitchChatMessage : TwitchMessage
     {
+        public IDictionary<string, string> Badges { get; set; }
+
+        public int Bits { get; set; }
+
+        public string Body { get; set; }
+
+        public string Channel { get; set; }
+
+        public string ChannelId { get; set; }
+
+        public string DisplayName { get; set; }
+
+        public string Emotes { get; set; }
+
+        public bool IsAction { get; set; }
+
+        public bool IsModerator { get; set; }
+
+        public bool IsSubscriber { get; set; }
+
+        public bool IsTurbo { get; set; }
+
         public string MessageId { get; set; }
 
         public long Timestamp { get; set; }
+
+        public string UserColor { get; set; }
 
         public string UserId { get; set; }
 
         public string Username { get; set; }
 
-        public string DisplayName { get; set; }
-
-        public string UserColor { get; set; }
-
-        public bool Moderator { get; set; }
-
-        public bool Subscriber { get; set; }
-
-        public bool Turbo { get; set; }
-
         public TwitchUserType UserType { get; set; }
-
-        public string Emotes { get; set; }
-
-        public string Body { get; set; }
-
-        public IDictionary<string, string> Badges { get; set; }
-
-        public string ChannelId { get; set; }
-
-        public int Bits { get; set; }
-
-        public bool IsAction { get; set; }
-
-        public string Channel { get; set; }
 
         public TwitchChatMessage(IrcMessage message)
         {
@@ -47,6 +47,9 @@ namespace SimpleTwitchBot.Lib.Models
                 {
                     case "badges":
                         Badges = ParseBadges(tag.Value);
+                        break;
+                    case "bits":
+                        Bits = int.Parse(tag.Value);
                         break;
                     case "color":
                         UserColor = tag.Value;
@@ -61,28 +64,25 @@ namespace SimpleTwitchBot.Lib.Models
                         MessageId = tag.Value;
                         break;
                     case "mod":
-                        Moderator = tag.Value.Equals("1");
+                        IsModerator = tag.Value.Equals("1");
                         break;
                     case "room-id":
                         ChannelId = tag.Value;
                         break;
+                    case "subscriber":
+                        IsSubscriber = tag.Value.Equals("1");
+                        break;
                     case "tmi-sent-ts":
                         Timestamp = long.Parse(tag.Value);
                         break;
-                    case "subscriber":
-                        Subscriber = tag.Value.Equals("1");
-                        break;
                     case "turbo":
-                        Turbo = tag.Value.Equals("1");
+                        IsTurbo = tag.Value.Equals("1");
                         break;
                     case "user-id":
                         UserId = tag.Value;
                         break;
                     case "user-type":
                         UserType = ConvertToUserType(tag.Value);
-                        break;
-                    case "bits":
-                        Bits = int.Parse(tag.Value);
                         break;
                 }
             }
@@ -91,10 +91,10 @@ namespace SimpleTwitchBot.Lib.Models
             Channel = message.Params[0];
 
             string messageBody = message.Params[1];
-            Match match = Regex.Match(messageBody, @"\u0001ACTION\s.+\u0001");
-            if (match.Success)
+            Match actionMatch = Regex.Match(messageBody, @"\u0001ACTION\s.+\u0001");
+            if (actionMatch.Success)
             {
-                Body = match.Value;
+                Body = actionMatch.Value;
                 IsAction = true;
             }
             else
