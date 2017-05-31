@@ -12,7 +12,7 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler<OnUserStateReceivedArgs> OnUserStateReceived;
         public event EventHandler<OnUserSubscribedArgs> OnUserSubscribed;
 
-        public TwitchIrcClient(string ip, int port) : base(ip, port)
+        public TwitchIrcClient(string host, int port) : base(host, port)
         {
             OnPing += Client_OnPing;
             OnConnect += TwitchIrcClient_OnConnect;

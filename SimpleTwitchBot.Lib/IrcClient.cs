@@ -10,13 +10,14 @@ namespace SimpleTwitchBot.Lib
 {
     public class IrcClient
     {
-        private readonly string _ip;
+        private readonly string _host;
         private readonly int _port;
         private readonly TcpClient _tcpClient;
+        private readonly List<string> _joinedChannels;
 
-        public string Username { get; protected set; }
-        public List<string> JoinedChannels { get; protected set; }
-        public bool IsConnected { get; protected set; }
+        public string Username { get; private set; }
+        public IList<string> JoinedChannels => _joinedChannels.AsReadOnly();
+        public bool IsConnected { get; private set; }
 
         private StreamReader _inputStream;
         private StreamWriter _outputStream;
@@ -28,12 +29,12 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler<OnChannelJoinedArgs> OnChannelJoined;
         public event EventHandler<OnChannelPartedArgs> OnChannelParted;
 
-        public IrcClient(string ip, int port)
+        public IrcClient(string host, int port)
         {
-            _ip = ip;
+            _host = host;
             _port = port;
             _tcpClient = new TcpClient();
-            JoinedChannels = new List<string>();
+            _joinedChannels = new List<string>();
             IsConnected = false;
         }
 
@@ -41,7 +42,7 @@ namespace SimpleTwitchBot.Lib
         {
             Username = username.ToLower();
 
-            await _tcpClient.ConnectAsync(_ip, _port);
+            await _tcpClient.ConnectAsync(_host, _port);
 
             NetworkStream stream = _tcpClient.GetStream();
             _inputStream = new StreamReader(stream);
@@ -105,13 +106,13 @@ namespace SimpleTwitchBot.Lib
 
         private void CallOnChannelJoined(string channel)
         {
-            JoinedChannels.Add(channel);
+            _joinedChannels.Add(channel);
             OnChannelJoined?.Invoke(this, new OnChannelJoinedArgs { Channel = channel });
         }
 
         private void CallOnChannelParted(string channel)
         {
-            JoinedChannels.Remove(channel);
+            _joinedChannels.Remove(channel);
             OnChannelParted?.Invoke(this, new OnChannelPartedArgs { Channel = channel });
         }
 

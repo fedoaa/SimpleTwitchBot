@@ -5,19 +5,30 @@ namespace SimpleTwitchBot.Lib.Models
 {
     public class IrcMessage
     {
-        public IDictionary<string, string> Tags { get; set; }
-
-        public string Prefix { get; set; }
-
         public string Command { get; set; }
 
         public IList<string> Params { get; set; }
 
+        public string Prefix { get; set; }
+
         public string Raw { get; set; }
+
+        public IDictionary<string, string> Tags { get; set; }
 
         public IrcMessage()
         {
-            Tags = new Dictionary<string, string>();
+
+        }
+
+        public IrcMessage(string message)
+        {
+            IrcMessage ircMessage = Parse(message);
+
+            Command = ircMessage.Command;
+            Params = ircMessage.Params;
+            Prefix = ircMessage.Prefix;
+            Raw = ircMessage.Raw;
+            Tags = ircMessage.Tags;
         }
 
         public static IrcMessage Parse(string message)
@@ -28,23 +39,27 @@ namespace SimpleTwitchBot.Lib.Models
             }
 
             var ircMessage = new IrcMessage { Raw = message };
+
             int position = 0;
-            
             bool hasTags = message.StartsWith("@");
+            var ircMessageTags = new Dictionary<string, string>();
+
             if (hasTags)
             {
                 int endOfTags = message.IndexOf(' ');
-                string[] messageTags = message.Substring(1, endOfTags - 1).Split(';');
+                string[] tags = message.Substring(1, endOfTags - 1).Split(';');
 
-                for (int i = 0; i < messageTags.Length; i++)
+                for (int i = 0; i < tags.Length; i++)
                 {
-                    string[] tagData = messageTags[i].Split('=');
+                    string[] tagData = tags[i].Split('=');
                     string tagName = tagData[0], tagValue = tagData[1];
 
-                    ircMessage.Tags.Add(tagName, tagValue);
+                    ircMessageTags.Add(tagName, tagValue);
                 }
                 position = endOfTags + 1;
             }
+            ircMessage.Tags = ircMessageTags;
+
             bool hasPrefix = message[position].Equals(':');
             if (hasPrefix)
             {
@@ -55,14 +70,14 @@ namespace SimpleTwitchBot.Lib.Models
                 ircMessage.Prefix = prefix;
                 position = endOfPrefix + 1;
             }
+
+            var ircMessageParams = new List<string>();
             int endOfCommand = message.IndexOf(' ', position);
             if (endOfCommand != -1)
             {
                 int lengthOfCommand = endOfCommand - position;
                 ircMessage.Command = message.Substring(position, lengthOfCommand);
                 position = endOfCommand + 1;
-
-                var ircMessageParams = new List<string>();
                 
                 int startOfTrailing = message.IndexOf(':', position);
                 if (startOfTrailing != -1)
@@ -82,12 +97,12 @@ namespace SimpleTwitchBot.Lib.Models
                     string middle = message.Substring(position);
                     ircMessageParams.AddRange(middle.Split(' '));
                 }
-                ircMessage.Params = ircMessageParams;
             }
             else
             {
                 ircMessage.Command = message.Substring(position);
             }
+            ircMessage.Params = ircMessageParams;
             return ircMessage;
         }
     }
