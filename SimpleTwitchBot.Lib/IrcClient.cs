@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SimpleTwitchBot.Lib
 {
-    public class IrcClient
+    public class IrcClient: IDisposable
     {
         private readonly string _host;
         private readonly int _port;
@@ -19,6 +19,7 @@ namespace SimpleTwitchBot.Lib
         public IList<string> JoinedChannels => _joinedChannels.AsReadOnly();
         public bool IsConnected { get; private set; }
 
+        private bool _disposed = false;
         private StreamReader _inputStream;
         private StreamWriter _outputStream;
 
@@ -153,6 +154,27 @@ namespace SimpleTwitchBot.Lib
         public void SendChatMessage(string target, string message)
         {
             SendIrcMessage($"PRIVMSG {target} :{message}");
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+            {
+                return;
+            }
+            if (disposing)
+            {
+                _tcpClient.Dispose();
+                _inputStream?.Dispose();
+                _outputStream?.Dispose();
+            }
+            _disposed = true;
         }
     }
 }
