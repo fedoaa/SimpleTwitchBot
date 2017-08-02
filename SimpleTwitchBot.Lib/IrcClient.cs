@@ -27,6 +27,7 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler OnDisconnect;
         public event EventHandler<OnIrcMessageReceivedArgs> OnIrcMessageReceived;
         public event EventHandler<OnPingArgs> OnPing;
+        public event EventHandler<OnUserJoinedArgs> OnUserJoined;
         public event EventHandler<OnChannelJoinedArgs> OnChannelJoined;
         public event EventHandler<OnChannelPartedArgs> OnChannelParted;
 
@@ -78,7 +79,17 @@ namespace SimpleTwitchBot.Lib
                         CallOnConnect();
                         break;
                     case "JOIN":
-                        CallOnChannelJoined(channel: ircMessage.Params[0]);
+                        string channel = ircMessage.Params[0];
+                        string username = ircMessage.Prefix.Split('!', '@')[1];
+
+                        if (Username.Equals(username))
+                        {
+                            CallOnChannelJoined(channel);
+                        }
+                        else
+                        {
+                            CallOnUserJoined(username, channel);
+                        }
                         break;
                     case "PART":
                         CallOnChannelParted(channel: ircMessage.Params[0]);
@@ -111,6 +122,11 @@ namespace SimpleTwitchBot.Lib
             OnChannelJoined?.Invoke(this, new OnChannelJoinedArgs { Channel = channel });
         }
 
+        private void CallOnUserJoined(string username, string channel)
+        {
+            OnUserJoined?.Invoke(this, new OnUserJoinedArgs { Username = username, Channel = channel });
+        }
+
         private void CallOnChannelParted(string channel)
         {
             _joinedChannels.Remove(channel);
@@ -130,6 +146,7 @@ namespace SimpleTwitchBot.Lib
         private void CallOnDisconnect()
         {
             IsConnected = false;
+            _joinedChannels.Clear();
             OnDisconnect?.Invoke(this, EventArgs.Empty);
         }
 

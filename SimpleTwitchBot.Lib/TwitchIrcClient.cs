@@ -23,6 +23,7 @@ namespace SimpleTwitchBot.Lib
         {
             SendIrcMessage("CAP REQ :twitch.tv/tags");
             SendIrcMessage("CAP REQ :twitch.tv/commands");
+            SendIrcMessage("CAP REQ :twitch.tv/membership");
         }
 
         private void Client_OnPing(object sender, OnPingArgs e)
