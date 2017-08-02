@@ -15,9 +15,10 @@ namespace SimpleTwitchBot.ConsoleApp
 
         public static async Task MainAsync()
         {
-            _client = new TwitchIrcClient("irc.twitch.tv", 6667);
+            _client = new TwitchIrcClient("irc.chat.twitch.tv", 6667);
             _client.OnConnect += Client_OnConnect;
             _client.OnChannelJoined += Client_OnChannelJoined;
+            _client.OnUserJoined += Client_OnUserJoined;
             _client.OnIrcMessageReceived += Client_OnIrcMessageReceived;
             _client.OnChatMessageReceived += Client_OnChatMessageReceived;
             _client.OnUserSubscribed += Client_OnUserSubscribed;
@@ -37,7 +38,12 @@ namespace SimpleTwitchBot.ConsoleApp
 
         private static void Client_OnChannelJoined(object sender, OnChannelJoinedArgs e)
         {
-            _client.SendChatMessage(e.Channel, "Keepo");
+            Console.WriteLine($"Joined {e.Channel}");
+        }
+
+        private static void Client_OnUserJoined(object sender, OnUserJoinedArgs e)
+        {
+            Console.WriteLine($"{e.Username} has joined {e.Channel}");
         }
 
         private static void Client_OnIrcMessageReceived(object sender, OnIrcMessageReceivedArgs e)
