@@ -6,81 +6,81 @@ namespace SimpleTwitchBot.Lib
 {
     public class TwitchIrcClient : IrcClient
     {
-        public event EventHandler<OnChatMessageReceivedArgs> OnChatMessageReceived;
-        public event EventHandler<OnWhisperMessageReceivedArgs> OnWhisperMessageReceived;
-        public event EventHandler<OnChannelStateChangedArgs> OnChannelStateChanged;
-        public event EventHandler<OnUserStateReceivedArgs> OnUserStateReceived;
-        public event EventHandler<OnUserSubscribedArgs> OnUserSubscribed;
+        public event EventHandler<ChatMessageReceivedEventArgs> ChatMessageReceived;
+        public event EventHandler<WhisperMessageReceivedEventArgs> WhisperMessageReceived;
+        public event EventHandler<ChannelStateChangedEventArgs> ChannelStateChanged;
+        public event EventHandler<UserStateReceivedEventArgs> UserStateReceived;
+        public event EventHandler<UserSubscribedEventArgs> UserSubscribed;
 
         public TwitchIrcClient(string host, int port) : base(host, port)
         {
-            OnPing += Client_OnPing;
-            OnConnect += TwitchIrcClient_OnConnect;
-            OnIrcMessageReceived += Client_OnIrcMessageReceived;
+            PingReceived += Client_PingReceived;
+            Connected += TwitchIrcClient_Connected;
+            IrcMessageReceived += Client_IrcMessageReceived;
         }
 
-        private void TwitchIrcClient_OnConnect(object sender, EventArgs e)
+        private void TwitchIrcClient_Connected(object sender, EventArgs e)
         {
             SendIrcMessage("CAP REQ :twitch.tv/tags");
             SendIrcMessage("CAP REQ :twitch.tv/commands");
             SendIrcMessage("CAP REQ :twitch.tv/membership");
         }
 
-        private void Client_OnPing(object sender, OnPingArgs e)
+        private void Client_PingReceived(object sender, PingReceivedEventArgs e)
         {
             SendIrcMessage($"PONG {e.ServerAddress}");
         }
 
-        private void Client_OnIrcMessageReceived(object sender, OnIrcMessageReceivedArgs e)
+        private void Client_IrcMessageReceived(object sender, IrcMessageReceivedEventArgs e)
         {
             switch(e.Message.Command)
             {
                 case "PRIVMSG":
                     var chatMessage = new TwitchChatMessage(e.Message);
-                    CallOnChatMessageReceived(chatMessage);
+                    OnChatMessageReceived(chatMessage);
                     break;
                 case "WHISPER":
                     var whisperMessage = new TwitchWhisperMessage(e.Message);
-                    CallOnWhisperMessageReceived(whisperMessage);
+                    OnWhisperMessageReceived(whisperMessage);
                     break;
                 case "ROOMSTATE":
                     var channelState = new TwitchChannelState(e.Message);
-                    CallOnChannelStateChanged(channelState);
+                    OnChannelStateChanged(channelState);
                     break;
                 case "USERSTATE":
                     var userState = new TwitchUserState(e.Message);
-                    CallOnUserStateReceived(userState);
+                    OnUserStateReceived(userState);
                     break;
                 case "USERNOTICE":
                     var subscription = new TwitchSubscription(e.Message);
-                    CallOnUserSubscribed(subscription);
+                    OnUserSubscribed(subscription);
                     break;
             }
         }
 
-        private void CallOnChatMessageReceived(TwitchChatMessage message)
+        protected virtual void OnChatMessageReceived(TwitchChatMessage message)
         {
-            OnChatMessageReceived?.Invoke(this, new OnChatMessageReceivedArgs { Message = message });
+            ChatMessageReceived?.Invoke(this, new ChatMessageReceivedEventArgs { Message = message });
         }
 
-        private void CallOnWhisperMessageReceived(TwitchWhisperMessage message)
+        protected virtual void OnWhisperMessageReceived(TwitchWhisperMessage message)
         {
-            OnWhisperMessageReceived?.Invoke(this, new OnWhisperMessageReceivedArgs { Message = message });
+            WhisperMessageReceived?.Invoke(this, new WhisperMessageReceivedEventArgs { Message = message });
         }
 
-        private void CallOnChannelStateChanged(TwitchChannelState channelState)
+        protected virtual void OnChannelStateChanged(TwitchChannelState channelState)
         {
-            OnChannelStateChanged?.Invoke(this, new OnChannelStateChangedArgs { ChannelState = channelState });
+            ChannelStateChanged?.Invoke(this, new ChannelStateChangedEventArgs { ChannelState = channelState });
         }
 
-        private void CallOnUserStateReceived(TwitchUserState userState)
+        protected virtual void OnUserStateReceived(TwitchUserState userState)
         {
-            OnUserStateReceived?.Invoke(this, new OnUserStateReceivedArgs { UserState = userState });
+            UserStateReceived?.Invoke(this, new UserStateReceivedEventArgs { UserState = userState });
         }
 
-        private void CallOnUserSubscribed(TwitchSubscription subscription)
+        protected virtual void OnUserSubscribed(TwitchSubscription subscription)
         {
-            OnUserSubscribed?.Invoke(this, new OnUserSubscribedArgs { Subscription = subscription });
+            UserSubscribed?.Invoke(this, new UserSubscribedEventArgs { Subscription = subscription });
         }
 
         public void SendWhisperMessage(string username, string message)

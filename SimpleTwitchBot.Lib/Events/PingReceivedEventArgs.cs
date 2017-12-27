@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Events
 {
-    public class OnPingArgs : EventArgs
+    public class PingReceivedEventArgs : EventArgs
     {
         public string ServerAddress { get; set; }
     }

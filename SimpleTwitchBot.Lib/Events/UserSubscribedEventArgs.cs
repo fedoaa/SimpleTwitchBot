@@ -3,7 +3,7 @@ using System;
 
 namespace SimpleTwitchBot.Lib.Events
 {
-    public class OnUserSubscribedArgs : EventArgs
+    public class UserSubscribedEventArgs : EventArgs
     {
         public TwitchSubscription Subscription { get; set; }
     }

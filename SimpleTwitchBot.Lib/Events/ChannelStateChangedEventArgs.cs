@@ -1,8 +1,9 @@
 ﻿using SimpleTwitchBot.Lib.Models;
+using System;
 
 namespace SimpleTwitchBot.Lib.Events
 {
-    public class OnChannelStateChangedArgs
+    public class ChannelStateChangedEventArgs : EventArgs
     {
         public TwitchChannelState ChannelState { get; set; }
     }

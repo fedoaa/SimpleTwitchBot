@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Events
 {
-    public class OnUserJoinedArgs : EventArgs
+    public class UserJoinedEventArgs : EventArgs
     {
         public string Username { get; set; }
 

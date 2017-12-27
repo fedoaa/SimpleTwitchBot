@@ -23,13 +23,13 @@ namespace SimpleTwitchBot.Lib
         private StreamReader _inputStream;
         private StreamWriter _outputStream;
 
-        public event EventHandler OnConnect;
-        public event EventHandler OnDisconnect;
-        public event EventHandler<OnIrcMessageReceivedArgs> OnIrcMessageReceived;
-        public event EventHandler<OnPingArgs> OnPing;
-        public event EventHandler<OnUserJoinedArgs> OnUserJoined;
-        public event EventHandler<OnChannelJoinedArgs> OnChannelJoined;
-        public event EventHandler<OnChannelPartedArgs> OnChannelParted;
+        public event EventHandler Connected;
+        public event EventHandler Disconnected;
+        public event EventHandler<IrcMessageReceivedEventArgs> IrcMessageReceived;
+        public event EventHandler<PingReceivedEventArgs> PingReceived;
+        public event EventHandler<UserJoinedEventArgs> UserJoined;
+        public event EventHandler<ChannelJoinedEventArgs> ChannelJoined;
+        public event EventHandler<ChannelPartedEventArgs> ChannelParted;
 
         public IrcClient(string host, int port)
         {
@@ -66,17 +66,17 @@ namespace SimpleTwitchBot.Lib
         {
             while (_tcpClient.Connected)
             {
-                string message = await ReadMessageAsync();
-                if (message == null)
+                string rawMessage = await ReadMessageAsync();
+                if (string.IsNullOrEmpty(rawMessage))
                 {
                     continue;
                 }
 
-                var ircMessage = IrcMessage.Parse(message);
+                var ircMessage = new IrcMessage(rawMessage);
                 switch (ircMessage.Command)
                 {
                     case "001":
-                        CallOnConnect();
+                        OnConnected();
                         break;
                     case "JOIN":
                         string channel = ircMessage.Params[0];
@@ -84,25 +84,25 @@ namespace SimpleTwitchBot.Lib
 
                         if (Username.Equals(username))
                         {
-                            CallOnChannelJoined(channel);
+                            OnChannelJoined(channel);
                         }
                         else
                         {
-                            CallOnUserJoined(username, channel);
+                            OnUserJoined(username, channel);
                         }
                         break;
                     case "PART":
-                        CallOnChannelParted(channel: ircMessage.Params[0]);
+                        OnChannelParted(channel: ircMessage.Params[0]);
                         break;
                     case "PING":
-                        CallOnPing(serverAddress: ircMessage.Params[0]);
+                        OnPingReceived(serverAddress: ircMessage.Params[0]);
                         break;
                     default:
-                        CallOnIrcMessageReceived(ircMessage);
+                        OnIrcMessageReceived(ircMessage);
                         break;
                 }
             }
-            CallOnDisconnect();
+            OnDisconnected();
         }
 
         private async Task<string> ReadMessageAsync()
@@ -110,44 +110,44 @@ namespace SimpleTwitchBot.Lib
             return await _inputStream.ReadLineAsync();
         }
 
-        private void CallOnConnect()
+        protected virtual void OnConnected()
         {
             IsConnected = true;
-            OnConnect?.Invoke(this, EventArgs.Empty);
+            Connected?.Invoke(this, EventArgs.Empty);
         }
 
-        private void CallOnChannelJoined(string channel)
+        protected virtual void OnChannelJoined(string channel)
         {
             _joinedChannels.Add(channel);
-            OnChannelJoined?.Invoke(this, new OnChannelJoinedArgs { Channel = channel });
+            ChannelJoined?.Invoke(this, new ChannelJoinedEventArgs { Channel = channel });
         }
 
-        private void CallOnUserJoined(string username, string channel)
+        protected virtual void OnUserJoined(string username, string channel)
         {
-            OnUserJoined?.Invoke(this, new OnUserJoinedArgs { Username = username, Channel = channel });
+            UserJoined?.Invoke(this, new UserJoinedEventArgs { Username = username, Channel = channel });
         }
 
-        private void CallOnChannelParted(string channel)
+        protected virtual void OnChannelParted(string channel)
         {
             _joinedChannels.Remove(channel);
-            OnChannelParted?.Invoke(this, new OnChannelPartedArgs { Channel = channel });
+            ChannelParted?.Invoke(this, new ChannelPartedEventArgs { Channel = channel });
         }
 
-        private void CallOnPing(string serverAddress)
+        protected virtual void OnPingReceived(string serverAddress)
         {
-            OnPing?.Invoke(this, new OnPingArgs { ServerAddress = serverAddress });
+            PingReceived?.Invoke(this, new PingReceivedEventArgs { ServerAddress = serverAddress });
         }
 
-        private void CallOnIrcMessageReceived(IrcMessage message)
+        protected virtual void OnIrcMessageReceived(IrcMessage message)
         {
-            OnIrcMessageReceived?.Invoke(this, new OnIrcMessageReceivedArgs { Message = message });
+            IrcMessageReceived?.Invoke(this, new IrcMessageReceivedEventArgs { Message = message });
         }
 
-        private void CallOnDisconnect()
+        protected virtual void OnDisconnected()
         {
             IsConnected = false;
             _joinedChannels.Clear();
-            OnDisconnect?.Invoke(this, EventArgs.Empty);
+            Disconnected?.Invoke(this, EventArgs.Empty);
         }
 
         public void JoinChannel(string channel)
