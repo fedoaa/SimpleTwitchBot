@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTwitchBot.Lib", "SimpleTwitchBot.Lib\SimpleTwitchBot.Lib.csproj", "{B6AC5EB5-66DF-4545-8EDB-0E2B553C1A62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleTwitchBot.Lib", "SimpleTwitchBot.Lib\SimpleTwitchBot.Lib.csproj", "{B6AC5EB5-66DF-4545-8EDB-0E2B553C1A62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleTwitchBot.ConsoleApp", "SimpleTwitchBot.ConsoleApp\SimpleTwitchBot.ConsoleApp.csproj", "{E4EEB699-3134-44FB-A1C2-C1CD6EEAEE6E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleTwitchBot.Example", "SimpleTwitchBot.Example\SimpleTwitchBot.Example.csproj", "{E4EEB699-3134-44FB-A1C2-C1CD6EEAEE6E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,5 +24,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1F1ED250-FC25-4FC5-906B-1BBCFE54468B}
 	EndGlobalSection
 EndGlobal

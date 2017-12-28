@@ -3,7 +3,7 @@ using SimpleTwitchBot.Lib.Events;
 using System;
 using System.Threading.Tasks;
 
-namespace SimpleTwitchBot.ConsoleApp
+namespace SimpleTwitchBot.Example
 {
     class Program
     {
