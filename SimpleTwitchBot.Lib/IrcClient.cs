@@ -8,18 +8,19 @@ using System.Threading.Tasks;
 
 namespace SimpleTwitchBot.Lib
 {
-    public class IrcClient: IDisposable
+    public class IrcClient : IDisposable
     {
-        private readonly string _host;
-        private readonly int _port;
-        private readonly TcpClient _tcpClient;
-        private readonly List<string> _joinedChannels;
+        private readonly TcpClient _tcpClient = new TcpClient();
+        private readonly List<string> _joinedChannels = new List<string>();
 
+        public string Hostname { get; private set; }
+        public int Port { get; private set; }
         public string Username { get; private set; }
         public IList<string> JoinedChannels => _joinedChannels.AsReadOnly();
-        public bool IsConnected { get; private set; }
+        public bool IsConnected { get; private set; } = false;
 
         private bool _disposed = false;
+        private NetworkStream _stream;
         private StreamReader _inputStream;
         private StreamWriter _outputStream;
 
@@ -33,29 +34,26 @@ namespace SimpleTwitchBot.Lib
 
         public IrcClient(string host, int port)
         {
-            _host = host;
-            _port = port;
-            _tcpClient = new TcpClient();
-            _joinedChannels = new List<string>();
-            IsConnected = false;
+            Hostname = host;
+            Port = port;
         }
 
         public async Task ConnectAsync(string username, string password)
         {
             Username = username.ToLower();
 
-            await _tcpClient.ConnectAsync(_host, _port);
+            await _tcpClient.ConnectAsync(Hostname, Port);
 
-            NetworkStream stream = _tcpClient.GetStream();
-            _inputStream = new StreamReader(stream);
-            _outputStream = new StreamWriter(stream);
+            _stream = _tcpClient.GetStream();
+            _inputStream = new StreamReader(_stream);
+            _outputStream = new StreamWriter(_stream);
 
             _outputStream.WriteLine($"PASS {password}");
             _outputStream.WriteLine($"NICK {username}");
             _outputStream.WriteLine($"USER {username} 8 * :{username}");
             _outputStream.Flush();
 
-            await StartListen();
+            await StartListenAsync();
         }
 
         public void Disconnect()
@@ -63,7 +61,7 @@ namespace SimpleTwitchBot.Lib
             _tcpClient.Client.Shutdown(SocketShutdown.Both);
         }
 
-        private async Task StartListen()
+        private async Task StartListenAsync()
         {
             while (_tcpClient.Connected)
             {
@@ -172,7 +170,6 @@ namespace SimpleTwitchBot.Lib
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -184,6 +181,7 @@ namespace SimpleTwitchBot.Lib
             if (disposing)
             {
                 _tcpClient.Dispose();
+                _stream?.Dispose();
                 _inputStream?.Dispose();
                 _outputStream?.Dispose();
             }

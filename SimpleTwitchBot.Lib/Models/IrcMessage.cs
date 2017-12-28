@@ -35,7 +35,7 @@ namespace SimpleTwitchBot.Lib.Models
         {
             if (string.IsNullOrWhiteSpace(message))
             {
-                throw new ArgumentNullException(nameof(message));
+                throw new ArgumentNullException("Message cannot be empty", nameof(message));
             }
 
             var ircMessage = new IrcMessage { Raw = message };
