@@ -11,9 +11,7 @@ namespace SimpleTwitchBot.ConsoleApp
 
         private static TwitchIrcClient _client;
 
-        static void Main(string[] args) => MainAsync().GetAwaiter().GetResult();
-
-        public static async Task MainAsync()
+        static void Main(string[] args)
         {
             _client = new TwitchIrcClient("irc.chat.twitch.tv", 6667);
             _client.Connected += Client_Connected;
@@ -24,7 +22,7 @@ namespace SimpleTwitchBot.ConsoleApp
             _client.UserSubscribed += Client_UserSubscribed;
             _client.Disconnected += Client_Disconnected;
 
-            await _client.ConnectAsync("username", "oauth:token");
+            Task.Run(async () => await _client.ConnectAsync("username", "oauth:token"));
 
             Console.ReadLine();
             _client.Disconnect();
