@@ -14,45 +14,45 @@ namespace SimpleTwitchBot.Lib
 
         public TwitchIrcClient(string host, int port) : base(host, port)
         {
-            PingReceived += Client_PingReceived;
-            Connected += TwitchIrcClient_Connected;
-            IrcMessageReceived += Client_IrcMessageReceived;
         }
 
-        private void TwitchIrcClient_Connected(object sender, EventArgs e)
+        protected override void OnPingReceived(string serverAddress)
         {
+            base.OnPingReceived(serverAddress);
+            SendIrcMessage($"PONG {serverAddress}");
+        }
+
+        protected override void OnConnected()
+        {
+            base.OnConnected();
             SendIrcMessage("CAP REQ :twitch.tv/tags");
             SendIrcMessage("CAP REQ :twitch.tv/commands");
             SendIrcMessage("CAP REQ :twitch.tv/membership");
         }
 
-        private void Client_PingReceived(object sender, PingReceivedEventArgs e)
+        protected override void OnIrcMessageReceived(IrcMessage message)
         {
-            SendIrcMessage($"PONG {e.ServerAddress}");
-        }
-
-        private void Client_IrcMessageReceived(object sender, IrcMessageReceivedEventArgs e)
-        {
-            switch(e.Message.Command)
+            base.OnIrcMessageReceived(message);
+            switch (message.Command)
             {
                 case "PRIVMSG":
-                    var chatMessage = new TwitchChatMessage(e.Message);
+                    var chatMessage = new TwitchChatMessage(message);
                     OnChatMessageReceived(chatMessage);
                     break;
                 case "WHISPER":
-                    var whisperMessage = new TwitchWhisperMessage(e.Message);
+                    var whisperMessage = new TwitchWhisperMessage(message);
                     OnWhisperMessageReceived(whisperMessage);
                     break;
                 case "ROOMSTATE":
-                    var channelState = new TwitchChannelState(e.Message);
+                    var channelState = new TwitchChannelState(message);
                     OnChannelStateChanged(channelState);
                     break;
                 case "USERSTATE":
-                    var userState = new TwitchUserState(e.Message);
+                    var userState = new TwitchUserState(message);
                     OnUserStateReceived(userState);
                     break;
                 case "USERNOTICE":
-                    var subscription = new TwitchSubscription(e.Message);
+                    var subscription = new TwitchSubscription(message);
                     OnUserSubscribed(subscription);
                     break;
             }
