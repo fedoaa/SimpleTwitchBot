@@ -54,7 +54,8 @@ namespace SimpleTwitchBot.Lib
             _outputStream.WriteLine($"NICK {username}");
             _outputStream.WriteLine($"USER {username} 8 * :{username}");
             _outputStream.Flush();
-            StartListen();
+
+            await StartListen();
         }
 
         public void Disconnect()
@@ -62,11 +63,11 @@ namespace SimpleTwitchBot.Lib
             _tcpClient.Client.Shutdown(SocketShutdown.Both);
         }
 
-        private async void StartListen()
+        private async Task StartListen()
         {
             while (_tcpClient.Connected)
             {
-                string rawMessage = await ReadMessageAsync();
+                string rawMessage = await _inputStream.ReadLineAsync();
                 if (string.IsNullOrEmpty(rawMessage))
                 {
                     continue;
@@ -103,11 +104,6 @@ namespace SimpleTwitchBot.Lib
                 }
             }
             OnDisconnected();
-        }
-
-        private async Task<string> ReadMessageAsync()
-        {
-            return await _inputStream.ReadLineAsync();
         }
 
         protected virtual void OnConnected()
