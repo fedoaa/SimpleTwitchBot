@@ -2,6 +2,7 @@
 using SimpleTwitchBot.Lib.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -39,20 +40,40 @@ namespace SimpleTwitchBot.Lib
 
         public async Task ConnectAsync(string username, string password)
         {
+            if (string.IsNullOrEmpty(username))
+            {
+                throw new ArgumentNullException("Username cannot be empty", nameof(username));
+            }
+
             Username = username.ToLower();
-            _tcpClient = new TcpClient();
-            await _tcpClient.ConnectAsync(Hostname, Port);
+            try
+            {
+                _tcpClient = new TcpClient();
+                await _tcpClient.ConnectAsync(Hostname, Port);
 
-            NetworkStream networkStream = _tcpClient.GetStream();
-            _inputStream = new StreamReader(networkStream);
-            _outputStream = new StreamWriter(networkStream);
+                NetworkStream networkStream = _tcpClient.GetStream();
+                _inputStream = new StreamReader(networkStream);
+                _outputStream = new StreamWriter(networkStream);
 
-            _outputStream.WriteLine($"PASS {password}");
-            _outputStream.WriteLine($"NICK {username}");
-            _outputStream.WriteLine($"USER {username} 8 * :{username}");
-            _outputStream.Flush();
+                _outputStream.WriteLine($"PASS {password}");
+                _outputStream.WriteLine($"NICK {username}");
+                _outputStream.WriteLine($"USER {username} 8 * :{username}");
+                _outputStream.Flush();
 
-            await StartListenAsync();
+                await StartListenAsync();
+            }
+            catch (IOException ex) when ((ex.InnerException as SocketException)?.SocketErrorCode == SocketError.OperationAborted)
+            {
+                Debug.WriteLine("IOException: Operation aborted");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            finally
+            {
+                OnDisconnected();
+            }
         }
 
         public void Disconnect()
@@ -102,7 +123,6 @@ namespace SimpleTwitchBot.Lib
                         break;
                 }
             }
-            OnDisconnected();
         }
 
         protected virtual void OnConnected()
