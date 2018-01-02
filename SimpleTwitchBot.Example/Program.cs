@@ -7,31 +7,30 @@ namespace SimpleTwitchBot.Example
 {
     class Program
     {
-        private static string channelName = "#channelName";
-
-        private static TwitchIrcClient _client;
-
         static void Main(string[] args)
         {
-            _client = new TwitchIrcClient("irc.chat.twitch.tv", 6667);
-            _client.Connected += Client_Connected;
-            _client.ChannelJoined += Client_ChannelJoined;
-            _client.UserJoined += Client_UserJoined;
-            _client.IrcMessageReceived += Client_IrcMessageReceived;
-            _client.ChatMessageReceived += Client_ChatMessageReceived;
-            _client.UserSubscribed += Client_UserSubscribed;
-            _client.Disconnected += Client_Disconnected;
+            using (var client = new TwitchIrcClient("irc.chat.twitch.tv", 6667))
+            {
+                client.Connected += Client_Connected;
+                client.ChannelJoined += Client_ChannelJoined;
+                client.UserJoined += Client_UserJoined;
+                client.IrcMessageReceived += Client_IrcMessageReceived;
+                client.ChatMessageReceived += Client_ChatMessageReceived;
+                client.UserSubscribed += Client_UserSubscribed;
+                client.Disconnected += Client_Disconnected;
 
-            Task.Run(async () => await _client.ConnectAsync("username", "oauth:token"));
+                Task.Run(async () => await client.ConnectAsync("username", "oauth:token"));
 
-            Console.ReadLine();
-            _client.Disconnect();
+                Console.ReadLine();
+                client.Disconnect();
+            }
             Console.ReadLine();
         }
 
         private static void Client_Connected(object sender, EventArgs e)
         {
-            _client.JoinChannel(channelName);
+            var client = sender as IrcClient;
+            client?.JoinChannel("#channelName");
         }
 
         private static void Client_ChannelJoined(object sender, ChannelJoinedEventArgs e)
