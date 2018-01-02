@@ -10,7 +10,6 @@ namespace SimpleTwitchBot.Lib
 {
     public class IrcClient : IDisposable
     {
-        private readonly TcpClient _tcpClient = new TcpClient();
         private readonly List<string> _joinedChannels = new List<string>();
 
         public string Hostname { get; private set; }
@@ -20,7 +19,7 @@ namespace SimpleTwitchBot.Lib
         public bool IsConnected { get; private set; } = false;
 
         private bool _disposed = false;
-        private NetworkStream _stream;
+        private TcpClient _tcpClient;
         private StreamReader _inputStream;
         private StreamWriter _outputStream;
 
@@ -41,12 +40,12 @@ namespace SimpleTwitchBot.Lib
         public async Task ConnectAsync(string username, string password)
         {
             Username = username.ToLower();
-
+            _tcpClient = new TcpClient();
             await _tcpClient.ConnectAsync(Hostname, Port);
 
-            _stream = _tcpClient.GetStream();
-            _inputStream = new StreamReader(_stream);
-            _outputStream = new StreamWriter(_stream);
+            NetworkStream networkStream = _tcpClient.GetStream();
+            _inputStream = new StreamReader(networkStream);
+            _outputStream = new StreamWriter(networkStream);
 
             _outputStream.WriteLine($"PASS {password}");
             _outputStream.WriteLine($"NICK {username}");
@@ -58,7 +57,9 @@ namespace SimpleTwitchBot.Lib
 
         public void Disconnect()
         {
-            _tcpClient.Client.Shutdown(SocketShutdown.Both);
+            _tcpClient?.Close();
+            _inputStream?.Close();
+            _outputStream?.Close();
         }
 
         private async Task StartListenAsync()
@@ -68,7 +69,7 @@ namespace SimpleTwitchBot.Lib
                 string rawMessage = await _inputStream.ReadLineAsync();
                 if (string.IsNullOrEmpty(rawMessage))
                 {
-                    continue;
+                    break;
                 }
 
                 var ircMessage = new IrcMessage(rawMessage);
@@ -139,9 +140,12 @@ namespace SimpleTwitchBot.Lib
 
         protected virtual void OnDisconnected()
         {
-            IsConnected = false;
-            _joinedChannels.Clear();
-            Disconnected?.Invoke(this, EventArgs.Empty);
+            if (IsConnected)
+            {
+                IsConnected = false;
+                _joinedChannels.Clear();
+                Disconnected?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         public void JoinChannel(string channel)
@@ -180,8 +184,7 @@ namespace SimpleTwitchBot.Lib
             }
             if (disposing)
             {
-                _tcpClient.Dispose();
-                _stream?.Dispose();
+                _tcpClient?.Dispose();
                 _inputStream?.Dispose();
                 _outputStream?.Dispose();
             }
