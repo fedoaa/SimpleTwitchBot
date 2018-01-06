@@ -6,6 +6,7 @@ namespace SimpleTwitchBot.Lib
 {
     public class TwitchIrcClient : IrcClient
     {
+        public event EventHandler<GlobalUserStateReceivedEventArgs> GlobalUserStateReceived;
         public event EventHandler<ChatMessageReceivedEventArgs> ChatMessageReceived;
         public event EventHandler<WhisperMessageReceivedEventArgs> WhisperMessageReceived;
         public event EventHandler<ChannelStateChangedEventArgs> ChannelStateChanged;
@@ -25,9 +26,7 @@ namespace SimpleTwitchBot.Lib
         protected override void OnConnected()
         {
             base.OnConnected();
-            SendIrcMessage("CAP REQ :twitch.tv/tags");
-            SendIrcMessage("CAP REQ :twitch.tv/commands");
-            SendIrcMessage("CAP REQ :twitch.tv/membership");
+            SendIrcMessage("CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership");
         }
 
         protected override void OnIrcMessageReceived(IrcMessage message)
@@ -35,6 +34,10 @@ namespace SimpleTwitchBot.Lib
             base.OnIrcMessageReceived(message);
             switch (message.Command)
             {
+                case "GLOBALUSERSTATE":
+                    var globalUserState = new TwitchGlobalUserState(message);
+                    OnGlobalUserStateReceived(globalUserState);
+                    break;
                 case "PRIVMSG":
                     var chatMessage = new TwitchChatMessage(message);
                     OnChatMessageReceived(chatMessage);
@@ -56,6 +59,11 @@ namespace SimpleTwitchBot.Lib
                     OnUserSubscribed(subscription);
                     break;
             }
+        }
+
+        protected virtual void OnGlobalUserStateReceived(TwitchGlobalUserState globalUserState)
+        {
+            GlobalUserStateReceived?.Invoke(this, new GlobalUserStateReceivedEventArgs { GlobalUserState = globalUserState });
         }
 
         protected virtual void OnChatMessageReceived(TwitchChatMessage message)
