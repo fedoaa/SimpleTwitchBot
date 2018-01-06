@@ -5,6 +5,11 @@ namespace SimpleTwitchBot.Lib.Events
 {
     public class IrcMessageReceivedEventArgs : EventArgs
     {
-        public IrcMessage Message { get; set; }
+        public IrcMessage Message { get; }
+
+        public IrcMessageReceivedEventArgs(IrcMessage message)
+        {
+            Message = message;
+        }
     }
 }

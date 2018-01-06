@@ -5,6 +5,11 @@ namespace SimpleTwitchBot.Lib.Events
 {
     public class UserStateReceivedEventArgs : EventArgs
     {
-        public TwitchUserState UserState { get; set; }
+        public TwitchUserState UserState { get; }
+
+        public UserStateReceivedEventArgs(TwitchUserState userState)
+        {
+            UserState = userState;
+        }
     }
 }

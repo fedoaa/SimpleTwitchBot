@@ -5,6 +5,11 @@ namespace SimpleTwitchBot.Lib.Events
 {
     public class ChatMessageReceivedEventArgs : EventArgs
     {
-        public TwitchChatMessage Message { get; set; }
+        public TwitchChatMessage Message { get; }
+
+        public ChatMessageReceivedEventArgs(TwitchChatMessage message)
+        {
+            Message = message;
+        }
     }
 }

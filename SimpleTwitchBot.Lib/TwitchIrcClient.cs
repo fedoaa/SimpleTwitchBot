@@ -63,32 +63,32 @@ namespace SimpleTwitchBot.Lib
 
         protected virtual void OnGlobalUserStateReceived(TwitchGlobalUserState globalUserState)
         {
-            GlobalUserStateReceived?.Invoke(this, new GlobalUserStateReceivedEventArgs { GlobalUserState = globalUserState });
+            GlobalUserStateReceived?.Invoke(this, new GlobalUserStateReceivedEventArgs(globalUserState));
         }
 
         protected virtual void OnChatMessageReceived(TwitchChatMessage message)
         {
-            ChatMessageReceived?.Invoke(this, new ChatMessageReceivedEventArgs { Message = message });
+            ChatMessageReceived?.Invoke(this, new ChatMessageReceivedEventArgs(message));
         }
 
         protected virtual void OnWhisperMessageReceived(TwitchWhisperMessage message)
         {
-            WhisperMessageReceived?.Invoke(this, new WhisperMessageReceivedEventArgs { Message = message });
+            WhisperMessageReceived?.Invoke(this, new WhisperMessageReceivedEventArgs(message));
         }
 
         protected virtual void OnChannelStateChanged(TwitchChannelState channelState)
         {
-            ChannelStateChanged?.Invoke(this, new ChannelStateChangedEventArgs { ChannelState = channelState });
+            ChannelStateChanged?.Invoke(this, new ChannelStateChangedEventArgs(channelState));
         }
 
         protected virtual void OnUserStateReceived(TwitchUserState userState)
         {
-            UserStateReceived?.Invoke(this, new UserStateReceivedEventArgs { UserState = userState });
+            UserStateReceived?.Invoke(this, new UserStateReceivedEventArgs(userState));
         }
 
         protected virtual void OnUserSubscribed(TwitchSubscription subscription)
         {
-            UserSubscribed?.Invoke(this, new UserSubscribedEventArgs { Subscription = subscription });
+            UserSubscribed?.Invoke(this, new UserSubscribedEventArgs(subscription));
         }
 
         public void SendWhisperMessage(string username, string message)

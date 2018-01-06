@@ -5,6 +5,11 @@ namespace SimpleTwitchBot.Lib.Events
 {
     public class ChannelStateChangedEventArgs : EventArgs
     {
-        public TwitchChannelState ChannelState { get; set; }
+        public TwitchChannelState ChannelState { get; }
+
+        public ChannelStateChangedEventArgs(TwitchChannelState channelState)
+        {
+            ChannelState = channelState;
+        }
     }
 }

@@ -142,28 +142,28 @@ namespace SimpleTwitchBot.Lib
         protected virtual void OnChannelJoined(string channel)
         {
             _joinedChannels.Add(channel);
-            ChannelJoined?.Invoke(this, new ChannelJoinedEventArgs { Channel = channel });
+            ChannelJoined?.Invoke(this, new ChannelJoinedEventArgs(channel));
         }
 
         protected virtual void OnUserJoined(string username, string channel)
         {
-            UserJoined?.Invoke(this, new UserJoinedEventArgs { Username = username, Channel = channel });
+            UserJoined?.Invoke(this, new UserJoinedEventArgs(username, channel));
         }
 
         protected virtual void OnChannelParted(string channel)
         {
             _joinedChannels.Remove(channel);
-            ChannelParted?.Invoke(this, new ChannelPartedEventArgs { Channel = channel });
+            ChannelParted?.Invoke(this, new ChannelPartedEventArgs(channel));
         }
 
         protected virtual void OnPingReceived(string serverAddress)
         {
-            PingReceived?.Invoke(this, new PingReceivedEventArgs { ServerAddress = serverAddress });
+            PingReceived?.Invoke(this, new PingReceivedEventArgs(serverAddress));
         }
 
         protected virtual void OnIrcMessageReceived(IrcMessage message)
         {
-            IrcMessageReceived?.Invoke(this, new IrcMessageReceivedEventArgs { Message = message });
+            IrcMessageReceived?.Invoke(this, new IrcMessageReceivedEventArgs(message));
         }
 
         protected virtual void OnDisconnected()

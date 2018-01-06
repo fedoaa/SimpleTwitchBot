@@ -5,6 +5,11 @@ namespace SimpleTwitchBot.Lib.Events
 {
     public class WhisperMessageReceivedEventArgs : EventArgs
     {
-        public TwitchWhisperMessage Message { get; set; }
+        public TwitchWhisperMessage Message { get; }
+
+        public WhisperMessageReceivedEventArgs(TwitchWhisperMessage message)
+        {
+            Message = message;
+        }
     }
 }
