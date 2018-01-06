@@ -11,7 +11,7 @@ namespace SimpleTwitchBot.Example
         {
             using (var client = new TwitchIrcClient("irc.chat.twitch.tv", 6667))
             {
-                client.Connected += Client_Connected;
+                client.LoggedIn += Client_LoggedIn;
                 client.ChannelJoined += Client_ChannelJoined;
                 client.UserJoined += Client_UserJoined;
                 client.IrcMessageReceived += Client_IrcMessageReceived;
@@ -27,7 +27,7 @@ namespace SimpleTwitchBot.Example
             Console.ReadLine();
         }
 
-        private static void Client_Connected(object sender, EventArgs e)
+        private static void Client_LoggedIn(object sender, EventArgs e)
         {
             var client = sender as IrcClient;
             client?.JoinChannel("#channelName");

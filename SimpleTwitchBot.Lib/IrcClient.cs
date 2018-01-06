@@ -25,6 +25,7 @@ namespace SimpleTwitchBot.Lib
         private StreamWriter _outputStream;
 
         public event EventHandler Connected;
+        public event EventHandler LoggedIn;
         public event EventHandler Disconnected;
         public event EventHandler<IrcMessageReceivedEventArgs> IrcMessageReceived;
         public event EventHandler<PingReceivedEventArgs> PingReceived;
@@ -55,6 +56,8 @@ namespace SimpleTwitchBot.Lib
                 _inputStream = new StreamReader(networkStream);
                 _outputStream = new StreamWriter(networkStream);
 
+                OnConnected();
+
                 _outputStream.WriteLine($"PASS {password}");
                 _outputStream.WriteLine($"NICK {username}");
                 _outputStream.WriteLine($"USER {username} 8 * :{username}");
@@ -74,6 +77,12 @@ namespace SimpleTwitchBot.Lib
             {
                 OnDisconnected();
             }
+        }
+
+        protected virtual void OnConnected()
+        {
+            IsConnected = true;
+            Connected?.Invoke(this, EventArgs.Empty);
         }
 
         public void Disconnect()
@@ -97,7 +106,7 @@ namespace SimpleTwitchBot.Lib
                 switch (ircMessage.Command)
                 {
                     case "001":
-                        OnConnected();
+                        OnLoggedIn();
                         break;
                     case "JOIN":
                         string channel = ircMessage.Params[0];
@@ -125,10 +134,9 @@ namespace SimpleTwitchBot.Lib
             }
         }
 
-        protected virtual void OnConnected()
+        protected virtual void OnLoggedIn()
         {
-            IsConnected = true;
-            Connected?.Invoke(this, EventArgs.Empty);
+            LoggedIn?.Invoke(this, EventArgs.Empty);
         }
 
         protected virtual void OnChannelJoined(string channel)
