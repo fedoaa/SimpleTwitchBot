@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchSubscription: TwitchMessage
+    public class TwitchSubscription : TwitchMessage
     {
         public IDictionary<string, string> Badges { get; set; }
 
@@ -25,8 +25,6 @@ namespace SimpleTwitchBot.Lib.Models
         public string MessageId { get; set; }
 
         public int Months { get; set; }
-
-        public TwitchSubscriptionType SubscriptionType { get; set; }
 
         public string SubscriptionPlanName { get; set; }
 
@@ -74,9 +72,6 @@ namespace SimpleTwitchBot.Lib.Models
                     case "mod":
                         IsModerator = tag.Value.Equals("1");
                         break;
-                    case "msg-id":
-                        SubscriptionType = ConvertToSubscriptionType(tag.Value);
-                        break;
                     case "msg-param-months":
                         Months = int.Parse(tag.Value);
                         break;
@@ -110,21 +105,6 @@ namespace SimpleTwitchBot.Lib.Models
                 }
 
                 Channel = message.Params[0];
-            }
-        }
-
-        private TwitchSubscriptionType ConvertToSubscriptionType(string tagValue)
-        {
-            switch (tagValue)
-            {
-                case "sub":
-                    return TwitchSubscriptionType.FirstTime;
-                case "resub":
-                    return TwitchSubscriptionType.Resub;
-                case "charity":
-                    return TwitchSubscriptionType.Charity;
-                default:
-                    return TwitchSubscriptionType.Unknown;
             }
         }
 

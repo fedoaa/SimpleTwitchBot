@@ -12,6 +12,7 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler<ChannelStateChangedEventArgs> ChannelStateChanged;
         public event EventHandler<UserStateReceivedEventArgs> UserStateReceived;
         public event EventHandler<UserSubscribedEventArgs> UserSubscribed;
+        public event EventHandler<UserSubscribedEventArgs> UserResubscribed;
 
         public TwitchIrcClient(string host, int port) : base(host, port)
         {
@@ -55,8 +56,29 @@ namespace SimpleTwitchBot.Lib
                     OnUserStateReceived(userState);
                     break;
                 case "USERNOTICE":
+                    DetectUserNoticeType(message);
+                    break;
+            }
+        }
+
+        private void DetectUserNoticeType(IrcMessage message)
+        {
+            string userNoticeType = message.Tags["msg-id"];
+            switch(userNoticeType)
+            {
+                case "sub":
                     var subscription = new TwitchSubscription(message);
                     OnUserSubscribed(subscription);
+                    break;
+                case "resub":
+                    var resubscription = new TwitchSubscription(message);
+                    OnUserResubscribed(resubscription);
+                    break;
+                case "subgift":
+                    break;
+                case "raid":
+                    break;
+                case "ritual":
                     break;
             }
         }
@@ -89,6 +111,11 @@ namespace SimpleTwitchBot.Lib
         protected virtual void OnUserSubscribed(TwitchSubscription subscription)
         {
             UserSubscribed?.Invoke(this, new UserSubscribedEventArgs(subscription));
+        }
+
+        protected virtual void OnUserResubscribed(TwitchSubscription resubscription)
+        {
+            UserResubscribed?.Invoke(this, new UserSubscribedEventArgs(resubscription));
         }
 
         public void SendWhisperMessage(string username, string message)
