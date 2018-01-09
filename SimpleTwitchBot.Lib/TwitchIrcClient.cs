@@ -6,13 +6,16 @@ namespace SimpleTwitchBot.Lib
 {
     public class TwitchIrcClient : IrcClient
     {
-        public event EventHandler<GlobalUserStateReceivedEventArgs> GlobalUserStateReceived;
         public event EventHandler<ChatMessageReceivedEventArgs> ChatMessageReceived;
-        public event EventHandler<WhisperMessageReceivedEventArgs> WhisperMessageReceived;
         public event EventHandler<ChannelStateChangedEventArgs> ChannelStateChanged;
+        public event EventHandler<ChannelRaidedEventArgs> ChannelRaided;
+        public event EventHandler<ChannelRitualPerformedEventArgs> ChannelRitualPerformed;
+        public event EventHandler<GlobalUserStateReceivedEventArgs> GlobalUserStateReceived;
+        public event EventHandler<SubscriptionGiftedEventArgs> SubscriptionGifted;
+        public event EventHandler<UserSubscribedEventArgs> UserResubscribed;
         public event EventHandler<UserStateReceivedEventArgs> UserStateReceived;
         public event EventHandler<UserSubscribedEventArgs> UserSubscribed;
-        public event EventHandler<UserSubscribedEventArgs> UserResubscribed;
+        public event EventHandler<WhisperMessageReceivedEventArgs> WhisperMessageReceived;
 
         public TwitchIrcClient(string host, int port) : base(host, port)
         {
@@ -56,30 +59,38 @@ namespace SimpleTwitchBot.Lib
                     OnUserStateReceived(userState);
                     break;
                 case "USERNOTICE":
-                    DetectUserNoticeType(message);
+                    FireAnEventBasedOnUserNoticeType(message);
                     break;
             }
         }
 
-        private void DetectUserNoticeType(IrcMessage message)
+        private void FireAnEventBasedOnUserNoticeType(IrcMessage message)
         {
-            string userNoticeType = message.Tags["msg-id"];
-            switch(userNoticeType)
+            if (message.Tags.TryGetValue("msg-id", out string userNoticeType))
             {
-                case "sub":
-                    var subscription = new TwitchSubscription(message);
-                    OnUserSubscribed(subscription);
-                    break;
-                case "resub":
-                    var resubscription = new TwitchSubscription(message);
-                    OnUserResubscribed(resubscription);
-                    break;
-                case "subgift":
-                    break;
-                case "raid":
-                    break;
-                case "ritual":
-                    break;
+                switch (userNoticeType)
+                {
+                    case "sub":
+                        var subscription = new TwitchSubscription(message);
+                        OnUserSubscribed(subscription);
+                        break;
+                    case "resub":
+                        var resubscription = new TwitchSubscription(message);
+                        OnUserResubscribed(resubscription);
+                        break;
+                    case "subgift":
+                        var subscriptionGift = new TwitchSubscriptionGift(message);
+                        OnSubscriptionGifted(subscriptionGift);
+                        break;
+                    case "raid":
+                        var channelRaid = new TwitchChannelRaid(message);
+                        OnChannelRaided(channelRaid);
+                        break;
+                    case "ritual":
+                        var channelRitual = new TwitchChannelRitual(message);
+                        OnChannelRitualPerformed(channelRitual);
+                        break;
+                }
             }
         }
 
@@ -116,6 +127,21 @@ namespace SimpleTwitchBot.Lib
         protected virtual void OnUserResubscribed(TwitchSubscription resubscription)
         {
             UserResubscribed?.Invoke(this, new UserSubscribedEventArgs(resubscription));
+        }
+
+        protected virtual void OnSubscriptionGifted(TwitchSubscriptionGift subscriptionGift)
+        {
+            SubscriptionGifted?.Invoke(this, new SubscriptionGiftedEventArgs(subscriptionGift));
+        }
+
+        protected virtual void OnChannelRaided(TwitchChannelRaid channelRaid)
+        {
+            ChannelRaided?.Invoke(this, new ChannelRaidedEventArgs(channelRaid));
+        }
+
+        protected virtual void OnChannelRitualPerformed(TwitchChannelRitual channelRitual)
+        {
+            ChannelRitualPerformed?.Invoke(this, new ChannelRitualPerformedEventArgs(channelRitual));
         }
 
         public void SendWhisperMessage(string username, string message)

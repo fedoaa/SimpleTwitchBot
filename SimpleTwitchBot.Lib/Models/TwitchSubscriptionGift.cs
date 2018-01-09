@@ -2,11 +2,9 @@
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchSubscription : TwitchMessage
+    public class TwitchSubscriptionGift : TwitchMessage
     {
         public IDictionary<string, string> Badges { get; set; }
-
-        public string Body { get; set; }
 
         public string Channel { get; set; }
 
@@ -26,6 +24,12 @@ namespace SimpleTwitchBot.Lib.Models
 
         public int Months { get; set; }
 
+        public string RecipientDisplayName { get; set; }
+
+        public string RecipientUserId { get;set; }
+
+        public string RecipientUserName { get; set; }
+
         public string SubscriptionPlanName { get; set; }
 
         public TwitchSubscriptionPlanType SubscriptionPlanType { get; set; }
@@ -42,7 +46,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public TwitchUserType UserType { get; set; }
 
-        public TwitchSubscription(IrcMessage message)
+        public TwitchSubscriptionGift(IrcMessage message)
         {
             foreach (KeyValuePair<string, string> tag in message.Tags)
             {
@@ -66,14 +70,20 @@ namespace SimpleTwitchBot.Lib.Models
                     case "login":
                         Username = tag.Value;
                         break;
-                    case "message":
-                        Body = tag.Value;
-                        break;
                     case "mod":
                         IsModerator = tag.Value.Equals("1");
                         break;
                     case "msg-param-months":
                         Months = int.Parse(tag.Value);
+                        break;
+                    case "msg-param-recipient-display-name":
+                        RecipientDisplayName = tag.Value;
+                        break;
+                    case "msg-param-recipient-id":
+                        RecipientUserId = tag.Value;
+                        break;
+                    case "msg-param-recipient-user-name":
+                        RecipientUserName = tag.Value;
                         break;
                     case "msg-param-sub-plan":
                         SubscriptionPlanType = ConvertToSubscriptionPlanType(tag.Value);
@@ -102,7 +112,7 @@ namespace SimpleTwitchBot.Lib.Models
                     case "user-type":
                         UserType = ConvertToUserType(tag.Value);
                         break;
-                } 
+                }
             }
 
             Channel = message.Params[0];

@@ -40,5 +40,22 @@ namespace SimpleTwitchBot.Lib.Models
             }
             return messageBadges;
         }
+
+        protected TwitchSubscriptionPlanType ConvertToSubscriptionPlanType(string tagValue)
+        {
+            switch (tagValue)
+            {
+                case "Prime":
+                    return TwitchSubscriptionPlanType.Prime;
+                case "1000":
+                    return TwitchSubscriptionPlanType.Tier1;
+                case "2000":
+                    return TwitchSubscriptionPlanType.Tier2;
+                case "3000":
+                    return TwitchSubscriptionPlanType.Tier3;
+                default:
+                    return TwitchSubscriptionPlanType.Unknown;
+            }
+        }
     }
 }

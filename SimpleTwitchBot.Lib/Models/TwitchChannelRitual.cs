@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchSubscription : TwitchMessage
+    public class TwitchChannelRitual : TwitchMessage
     {
         public IDictionary<string, string> Badges { get; set; }
 
@@ -24,11 +24,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string MessageId { get; set; }
 
-        public int Months { get; set; }
-
-        public string SubscriptionPlanName { get; set; }
-
-        public TwitchSubscriptionPlanType SubscriptionPlanType { get; set; }
+        public string RitualName { get; set; }
 
         public string SystemMessage { get; set; }
 
@@ -42,7 +38,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public TwitchUserType UserType { get; set; }
 
-        public TwitchSubscription(IrcMessage message)
+        public TwitchChannelRitual(IrcMessage message)
         {
             foreach (KeyValuePair<string, string> tag in message.Tags)
             {
@@ -72,14 +68,8 @@ namespace SimpleTwitchBot.Lib.Models
                     case "mod":
                         IsModerator = tag.Value.Equals("1");
                         break;
-                    case "msg-param-months":
-                        Months = int.Parse(tag.Value);
-                        break;
-                    case "msg-param-sub-plan":
-                        SubscriptionPlanType = ConvertToSubscriptionPlanType(tag.Value);
-                        break;
-                    case "msg-param-sub-plan-name":
-                        SubscriptionPlanName = tag.Value.Replace("\\s", " ");
+                    case "msg-param-ritual-name":
+                        RitualName = tag.Value;
                         break;
                     case "room-id":
                         ChannelId = tag.Value;
@@ -102,7 +92,7 @@ namespace SimpleTwitchBot.Lib.Models
                     case "user-type":
                         UserType = ConvertToUserType(tag.Value);
                         break;
-                } 
+                }
             }
 
             Channel = message.Params[0];
