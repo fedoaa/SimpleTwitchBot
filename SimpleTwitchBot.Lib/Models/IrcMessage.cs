@@ -17,28 +17,16 @@ namespace SimpleTwitchBot.Lib.Models
 
         public IrcMessage()
         {
-
         }
 
         public IrcMessage(string message)
-        {
-            IrcMessage ircMessage = Parse(message);
-
-            Command = ircMessage.Command;
-            Params = ircMessage.Params;
-            Prefix = ircMessage.Prefix;
-            Raw = ircMessage.Raw;
-            Tags = ircMessage.Tags;
-        }
-
-        public static IrcMessage Parse(string message)
         {
             if (string.IsNullOrWhiteSpace(message))
             {
                 throw new ArgumentNullException("Message cannot be empty", nameof(message));
             }
 
-            var ircMessage = new IrcMessage { Raw = message };
+            Raw = message;
 
             int position = 0;
             bool hasTags = message.StartsWith("@");
@@ -58,7 +46,7 @@ namespace SimpleTwitchBot.Lib.Models
                 }
                 position = endOfTags + 1;
             }
-            ircMessage.Tags = ircMessageTags;
+            Tags = ircMessageTags;
 
             bool hasPrefix = message[position].Equals(':');
             if (hasPrefix)
@@ -67,7 +55,7 @@ namespace SimpleTwitchBot.Lib.Models
                 int lengthOfPrefix = endOfPrefix - position - 1;
                 string prefix = message.Substring(position + 1, lengthOfPrefix);
 
-                ircMessage.Prefix = prefix;
+                Prefix = prefix;
                 position = endOfPrefix + 1;
             }
 
@@ -76,7 +64,7 @@ namespace SimpleTwitchBot.Lib.Models
             if (endOfCommand != -1)
             {
                 int lengthOfCommand = endOfCommand - position;
-                ircMessage.Command = message.Substring(position, lengthOfCommand);
+                Command = message.Substring(position, lengthOfCommand);
                 position = endOfCommand + 1;
                 
                 int startOfTrailing = message.IndexOf(':', position);
@@ -100,10 +88,9 @@ namespace SimpleTwitchBot.Lib.Models
             }
             else
             {
-                ircMessage.Command = message.Substring(position);
+                Command = message.Substring(position);
             }
-            ircMessage.Params = ircMessageParams;
-            return ircMessage;
+            Params = ircMessageParams;
         }
     }
 }
