@@ -6,6 +6,8 @@ namespace SimpleTwitchBot.Lib
 {
     public class TwitchIrcClient : IrcClient
     {
+        public event EventHandler<ChannelHostingStartedEventArgs> ChannelHostingStarted;
+        public event EventHandler<ChannelHostingStoppedEventArgs> ChannelHostingStopped;
         public event EventHandler<ChatMessageReceivedEventArgs> ChatMessageReceived;
         public event EventHandler<ChannelStateChangedEventArgs> ChannelStateChanged;
         public event EventHandler<ChannelRaidedEventArgs> ChannelRaided;
@@ -60,6 +62,17 @@ namespace SimpleTwitchBot.Lib
                     break;
                 case "USERNOTICE":
                     FireAnEventBasedOnUserNoticeType(message);
+                    break;
+                case "HOSTTARGET":
+                    var channelHost = new TwitchChannelHost(message);
+                    if (!string.IsNullOrEmpty(channelHost.TargetChannel))
+                    {
+                        OnChannelHostingStarted(channelHost);
+                    }
+                    else
+                    {
+                        OnChannelHostingStopped(channelHost);
+                    }
                     break;
             }
         }
@@ -142,6 +155,16 @@ namespace SimpleTwitchBot.Lib
         protected virtual void OnChannelRitualPerformed(TwitchChannelRitual channelRitual)
         {
             ChannelRitualPerformed?.Invoke(this, new ChannelRitualPerformedEventArgs(channelRitual));
+        }
+
+        protected virtual void OnChannelHostingStarted(TwitchChannelHost channelHost)
+        {
+            ChannelHostingStarted?.Invoke(this, new ChannelHostingStartedEventArgs(channelHost));
+        }
+
+        protected virtual void OnChannelHostingStopped(TwitchChannelHost channelHost)
+        {
+            ChannelHostingStopped?.Invoke(this, new ChannelHostingStoppedEventArgs(channelHost));
         }
 
         public void SendWhisperMessage(string username, string message)
