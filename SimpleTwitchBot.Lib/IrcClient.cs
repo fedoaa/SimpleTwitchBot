@@ -32,6 +32,7 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler LoggedIn;
         public event EventHandler<PingReceivedEventArgs> PingReceived;
         public event EventHandler<UserJoinedEventArgs> UserJoined;
+        public event EventHandler<UserPartedEventArgs> UserParted;
 
         public IrcClient(string host, int port)
         {
@@ -119,7 +120,14 @@ namespace SimpleTwitchBot.Lib
                         }
                         break;
                     case "PART":
-                        OnChannelParted(ircMessage.Channel);
+                        if (Username.Equals(ircMessage.Username))
+                        {
+                            OnChannelParted(ircMessage.Channel);
+                        }
+                        else
+                        {
+                            OnUserParted(ircMessage.Username, ircMessage.Channel);
+                        }
                         break;
                     case "PING":
                         string serverAddress = ircMessage.Params[0];
@@ -152,6 +160,11 @@ namespace SimpleTwitchBot.Lib
         {
             _joinedChannels.Remove(channel);
             ChannelParted?.Invoke(this, new ChannelPartedEventArgs(channel));
+        }
+
+        protected virtual void OnUserParted(string username, string channel)
+        {
+            UserParted?.Invoke(this, new UserPartedEventArgs(username, channel));
         }
 
         protected virtual void OnPingReceived(string serverAddress)
