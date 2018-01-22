@@ -87,8 +87,8 @@ namespace SimpleTwitchBot.Lib.Models
                 }
             }
 
-            Username = message.Prefix.Split('!', '@')[1];
-            Channel = message.Params[0];
+            Username = message.Username;
+            Channel = message.Channel;
 
             string messageBody = message.Params[1];
             Match actionMatch = Regex.Match(messageBody, @"\u0001ACTION\s.+\u0001");

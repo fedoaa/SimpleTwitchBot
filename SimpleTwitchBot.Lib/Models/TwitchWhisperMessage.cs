@@ -62,7 +62,7 @@ namespace SimpleTwitchBot.Lib.Models
                 }
             }
 
-            Username = message.Prefix.Split('!', '@')[1];
+            Username = message.Username;
             Body = message.Params[1];
         }
     }

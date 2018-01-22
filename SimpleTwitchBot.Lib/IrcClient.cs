@@ -25,13 +25,13 @@ namespace SimpleTwitchBot.Lib
         private StreamWriter _outputStream;
 
         public event EventHandler Connected;
-        public event EventHandler LoggedIn;
-        public event EventHandler Disconnected;
-        public event EventHandler<IrcMessageReceivedEventArgs> IrcMessageReceived;
-        public event EventHandler<PingReceivedEventArgs> PingReceived;
-        public event EventHandler<UserJoinedEventArgs> UserJoined;
         public event EventHandler<ChannelJoinedEventArgs> ChannelJoined;
         public event EventHandler<ChannelPartedEventArgs> ChannelParted;
+        public event EventHandler Disconnected;
+        public event EventHandler<IrcMessageReceivedEventArgs> IrcMessageReceived;
+        public event EventHandler LoggedIn;
+        public event EventHandler<PingReceivedEventArgs> PingReceived;
+        public event EventHandler<UserJoinedEventArgs> UserJoined;
 
         public IrcClient(string host, int port)
         {
@@ -109,23 +109,21 @@ namespace SimpleTwitchBot.Lib
                         OnLoggedIn();
                         break;
                     case "JOIN":
-                        string channel = ircMessage.Params[0];
-                        string username = ircMessage.Prefix.Split('!', '@')[1];
-
-                        if (Username.Equals(username))
+                        if (Username.Equals(ircMessage.Username))
                         {
-                            OnChannelJoined(channel);
+                            OnChannelJoined(ircMessage.Channel);
                         }
                         else
                         {
-                            OnUserJoined(username, channel);
+                            OnUserJoined(ircMessage.Username, ircMessage.Channel);
                         }
                         break;
                     case "PART":
-                        OnChannelParted(channel: ircMessage.Params[0]);
+                        OnChannelParted(ircMessage.Channel);
                         break;
                     case "PING":
-                        OnPingReceived(serverAddress: ircMessage.Params[0]);
+                        string serverAddress = ircMessage.Params[0];
+                        OnPingReceived(serverAddress);
                         break;
                     default:
                         OnIrcMessageReceived(ircMessage);

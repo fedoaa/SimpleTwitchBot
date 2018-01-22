@@ -10,7 +10,7 @@
 
         public TwitchChannelHost(IrcMessage message)
         {
-            HostingChannel = message.Params[0];
+            HostingChannel = message.Channel;
 
             string[] parameters = message.Params[1].Split(' ');
             if (!parameters[0].Equals("-"))

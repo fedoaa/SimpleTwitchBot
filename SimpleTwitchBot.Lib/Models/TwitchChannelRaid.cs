@@ -100,7 +100,7 @@ namespace SimpleTwitchBot.Lib.Models
                 }
             }
 
-            Channel = message.Params[0];
+            Channel = message.Channel;
         }
     }
 }
