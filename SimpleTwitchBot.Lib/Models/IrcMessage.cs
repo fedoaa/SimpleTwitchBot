@@ -111,7 +111,7 @@ namespace SimpleTwitchBot.Lib.Models
         private string ExtractUsername(string prefix)
         {
             string[] parts = prefix?.Split('!', '@');
-            return parts?.Length > 0 ? parts[1] : string.Empty;
+            return parts?.Length > 1 ? parts[1] : string.Empty;
         }
     }
 }
