@@ -2,8 +2,6 @@
 {
     public class TwitchHostedChannel : TwitchMessage
     {
-        public string HostingChannel { get; set; }
-
         public string HosterDisplayName { get; set; }
 
         public bool IsAutohost { get; set; }
@@ -14,7 +12,7 @@
 
         public TwitchHostedChannel(IrcMessage message)
         {
-            TargetChannel = $"#{message.Params[0]}";
+            TargetChannel = $"#{message.Channel}";
 
             string jtvMessage = message.Params[1];
 
@@ -26,7 +24,6 @@
                 NumberOfViewers = numberOfViewers;
             }
             HosterDisplayName = parameters[0];
-            HostingChannel = $"#{HosterDisplayName.ToLower()}";
         }
     }
 }
