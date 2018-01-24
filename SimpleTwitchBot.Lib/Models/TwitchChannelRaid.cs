@@ -24,7 +24,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string RaiderDisplayName { get; set; }
 
-        public string RaiderUserName { get; set; }
+        public string RaiderUsername { get; set; }
 
         public string SystemMessage { get; set; }
 
@@ -71,7 +71,7 @@ namespace SimpleTwitchBot.Lib.Models
                         RaiderDisplayName = tag.Value;
                         break;
                     case "msg-param-login":
-                        RaiderUserName = tag.Value;
+                        RaiderUsername = tag.Value;
                         break;
                     case "msg-param-viewerCount":
                         ViewerCount = int.Parse(tag.Value);

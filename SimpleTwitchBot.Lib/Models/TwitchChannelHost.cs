@@ -1,6 +1,6 @@
 ﻿namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchChannelHost
+    public class TwitchChannelHost : TwitchMessage
     {
         public string HostingChannel { get; set; }
 

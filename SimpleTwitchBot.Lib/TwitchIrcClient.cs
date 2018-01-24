@@ -6,6 +6,7 @@ namespace SimpleTwitchBot.Lib
 {
     public class TwitchIrcClient : IrcClient
     {
+        public event EventHandler<ChannelBeingHostedEventArgs> ChannelBeingHosted;
         public event EventHandler<ChannelHostingStartedEventArgs> ChannelHostingStarted;
         public event EventHandler<ChannelHostingStoppedEventArgs> ChannelHostingStopped;
         public event EventHandler<ChatMessageReceivedEventArgs> ChatMessageReceived;
@@ -45,8 +46,16 @@ namespace SimpleTwitchBot.Lib
                     OnGlobalUserStateReceived(globalUserState);
                     break;
                 case "PRIVMSG":
-                    var chatMessage = new TwitchChatMessage(message);
-                    OnChatMessageReceived(chatMessage);
+                    if (message.Username.Equals("jtv"))
+                    {
+                        var hostedChannel = new TwitchHostedChannel(message);
+                        OnChannelBeingHosted(hostedChannel);
+                    }
+                    else
+                    {
+                        var chatMessage = new TwitchChatMessage(message);
+                        OnChatMessageReceived(chatMessage);
+                    }
                     break;
                 case "WHISPER":
                     var whisperMessage = new TwitchWhisperMessage(message);
@@ -110,6 +119,11 @@ namespace SimpleTwitchBot.Lib
         protected virtual void OnGlobalUserStateReceived(TwitchGlobalUserState globalUserState)
         {
             GlobalUserStateReceived?.Invoke(this, new GlobalUserStateReceivedEventArgs(globalUserState));
+        }
+
+        protected virtual void OnChannelBeingHosted(TwitchHostedChannel hostedChannel)
+        {
+            ChannelBeingHosted?.Invoke(this, new ChannelBeingHostedEventArgs(hostedChannel));
         }
 
         protected virtual void OnChatMessageReceived(TwitchChatMessage message)
