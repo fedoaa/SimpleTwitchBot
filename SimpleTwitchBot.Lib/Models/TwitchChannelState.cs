@@ -8,6 +8,8 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string Channel { get; set; }
 
+        public string ChannelId { get; set; }
+
         public int FollowersOnlyMinutes { get; set; }
 
         public bool IsFollowersOnly => FollowersOnlyMinutes != -1;
@@ -15,6 +17,8 @@ namespace SimpleTwitchBot.Lib.Models
         public bool IsEmoteOnly { get; set; }
 
         public bool IsR9k { get; set; }
+
+        public bool RitualsEnabled { get; set; }
 
         public bool IsSlowMode { get; set; }
 
@@ -37,6 +41,12 @@ namespace SimpleTwitchBot.Lib.Models
                         break;
                     case "r9k":
                         IsR9k = tag.Value.Equals("1");
+                        break;
+                    case "rituals":
+                        RitualsEnabled = tag.Value.Equals("1");
+                        break;
+                    case "room-id":
+                        ChannelId = tag.Value;
                         break;
                     case "slow":
                         IsSlowMode = tag.Value.Equals("1");

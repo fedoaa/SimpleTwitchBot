@@ -6,8 +6,6 @@ namespace SimpleTwitchBot.Lib.Models
     {
         public IDictionary<string, string> Badges { get; set; }
 
-        public string Body { get; set; }
-
         public string Channel { get; set; }
 
         public string ChannelId { get; set; }
@@ -38,6 +36,8 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string UserId { get; set; }
 
+        public string UserMessage { get; set; }
+
         public string Username { get; set; }
 
         public TwitchUserType UserType { get; set; }
@@ -65,9 +65,6 @@ namespace SimpleTwitchBot.Lib.Models
                         break;
                     case "login":
                         Username = tag.Value;
-                        break;
-                    case "message":
-                        Body = tag.Value;
                         break;
                     case "mod":
                         IsModerator = tag.Value.Equals("1");
@@ -106,6 +103,7 @@ namespace SimpleTwitchBot.Lib.Models
             }
 
             Channel = message.Channel;
+            UserMessage = message.Params.Count > 1 ? message.Params[1] : string.Empty;
         }
     }
 }

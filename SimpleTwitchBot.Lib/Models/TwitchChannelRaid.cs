@@ -38,7 +38,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public TwitchUserType UserType { get; set; }
 
-        public int ViewerCount { get; set; }
+        public int NumberOfViewers { get; set; }
 
         public TwitchChannelRaid(IrcMessage message)
         {
@@ -74,7 +74,7 @@ namespace SimpleTwitchBot.Lib.Models
                         RaiderUsername = tag.Value;
                         break;
                     case "msg-param-viewerCount":
-                        ViewerCount = int.Parse(tag.Value);
+                        NumberOfViewers = int.Parse(tag.Value);
                         break;
                     case "room-id":
                         ChannelId = tag.Value;

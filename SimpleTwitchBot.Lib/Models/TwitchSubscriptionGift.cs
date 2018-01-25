@@ -28,7 +28,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string RecipientUserId { get;set; }
 
-        public string RecipientUserName { get; set; }
+        public string RecipientUsername { get; set; }
 
         public string SubscriptionPlanName { get; set; }
 
@@ -83,7 +83,7 @@ namespace SimpleTwitchBot.Lib.Models
                         RecipientUserId = tag.Value;
                         break;
                     case "msg-param-recipient-user-name":
-                        RecipientUserName = tag.Value;
+                        RecipientUsername = tag.Value;
                         break;
                     case "msg-param-sub-plan":
                         SubscriptionPlanType = ConvertToSubscriptionPlanType(tag.Value);

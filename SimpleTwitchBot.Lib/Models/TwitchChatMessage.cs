@@ -21,6 +21,8 @@ namespace SimpleTwitchBot.Lib.Models
 
         public bool IsAction { get; set; }
 
+        public bool IsEmotesOnly { get; set; }
+
         public bool IsModerator { get; set; }
 
         public bool IsSubscriber { get; set; }
@@ -60,6 +62,9 @@ namespace SimpleTwitchBot.Lib.Models
                     case "emotes":
                         Emotes = tag.Value;
                         break;
+                    case "emote-only":
+                        IsEmotesOnly = tag.Value.Equals("1");
+                        break;
                     case "id":
                         MessageId = tag.Value;
                         break;
@@ -91,10 +96,10 @@ namespace SimpleTwitchBot.Lib.Models
             Channel = message.Channel;
 
             string messageBody = message.Params[1];
-            Match actionMatch = Regex.Match(messageBody, @"\u0001ACTION\s.+\u0001");
+            Match actionMatch = Regex.Match(messageBody, @"\u0001ACTION\s(.+)\u0001");
             if (actionMatch.Success)
             {
-                Body = actionMatch.Value;
+                Body = actionMatch.Groups[1].Value;
                 IsAction = true;
             }
             else
