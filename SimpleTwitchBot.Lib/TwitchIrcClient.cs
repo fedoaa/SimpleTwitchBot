@@ -15,9 +15,11 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler<ChannelRitualPerformedEventArgs> ChannelRitualPerformed;
         public event EventHandler<GlobalUserStateReceivedEventArgs> GlobalUserStateReceived;
         public event EventHandler<SubscriptionGiftedEventArgs> SubscriptionGifted;
+        public event EventHandler<UserBannedEventArgs> UserBanned;
         public event EventHandler<UserSubscribedEventArgs> UserResubscribed;
         public event EventHandler<UserStateReceivedEventArgs> UserStateReceived;
         public event EventHandler<UserSubscribedEventArgs> UserSubscribed;
+        public event EventHandler<UserTimedOutEventArgs> UserTimedOut;
         public event EventHandler<WhisperMessageReceivedEventArgs> WhisperMessageReceived;
 
         public TwitchIrcClient(string host, int port) : base(host, port)
@@ -81,6 +83,18 @@ namespace SimpleTwitchBot.Lib
                     else
                     {
                         OnChannelHostingStopped(channelHost);
+                    }
+                    break;
+                case "CLEARCHAT":
+                    if (message.Tags.ContainsKey("ban-duration"))
+                    {
+                        var userTimeout = new TwitchUserTimeout(message);
+                        OnUserTimedOut(userTimeout);
+                    }
+                    else
+                    {
+                        var userBan = new TwitchUserBan(message);
+                        OnUserBanned(userBan);
                     }
                     break;
             }
@@ -179,6 +193,16 @@ namespace SimpleTwitchBot.Lib
         protected virtual void OnChannelHostingStopped(TwitchChannelHost channelHost)
         {
             ChannelHostingStopped?.Invoke(this, new ChannelHostingStoppedEventArgs(channelHost));
+        }
+
+        protected virtual void OnUserTimedOut(TwitchUserTimeout userTimeout)
+        {
+            UserTimedOut?.Invoke(this, new UserTimedOutEventArgs(userTimeout));
+        }
+
+        protected virtual void OnUserBanned(TwitchUserBan userBan)
+        {
+            UserBanned?.Invoke(this, new UserBannedEventArgs(userBan));
         }
 
         public void SendWhisperMessage(string username, string message)
