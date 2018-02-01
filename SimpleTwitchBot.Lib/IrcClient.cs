@@ -1,10 +1,9 @@
 ﻿using SimpleTwitchBot.Lib.Events;
+using SimpleTwitchBot.Lib.Events.Network;
 using SimpleTwitchBot.Lib.Models;
+using SimpleTwitchBot.Lib.Network;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace SimpleTwitchBot.Lib
@@ -20,9 +19,8 @@ namespace SimpleTwitchBot.Lib
         public bool IsConnected { get; private set; } = false;
 
         private bool _disposed = false;
-        private TcpClient _tcpClient;
-        private StreamReader _inputStream;
-        private StreamWriter _outputStream;
+        private ISimpleTcpClient _client;
+        private string _password;
 
         public event EventHandler Connected;
         public event EventHandler<ChannelJoinedEventArgs> ChannelJoined;
@@ -34,50 +32,28 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler<UserJoinedEventArgs> UserJoined;
         public event EventHandler<UserPartedEventArgs> UserParted;
 
-        public IrcClient(string host, int port)
+        public IrcClient(string host, int port) : this(new SimpleTcpClient())
         {
             Hostname = host;
             Port = port;
         }
 
-        public async Task ConnectAsync(string username, string password)
+        internal IrcClient(ISimpleTcpClient client)
         {
-            if (string.IsNullOrEmpty(username))
-            {
-                throw new ArgumentNullException("Username cannot be empty", nameof(username));
-            }
+            _client = client;
+            _client.Connected += Client_Connected;
+            _client.Disconnected += Client_Disconnected;
+            _client.MessageReceived += Client_MessageReceived;
+        }
 
-            Username = username.ToLower();
-            try
-            {
-                _tcpClient = new TcpClient();
-                await _tcpClient.ConnectAsync(Hostname, Port);
+        private void Client_Connected(object sender, EventArgs e)
+        {
+            OnConnected();
 
-                NetworkStream networkStream = _tcpClient.GetStream();
-                _inputStream = new StreamReader(networkStream);
-                _outputStream = new StreamWriter(networkStream);
-
-                OnConnected();
-
-                _outputStream.WriteLine($"PASS {password}");
-                _outputStream.WriteLine($"NICK {username}");
-                _outputStream.WriteLine($"USER {username} 8 * :{username}");
-                _outputStream.Flush();
-
-                await StartListenAsync();
-            }
-            catch (IOException ex) when ((ex.InnerException as SocketException)?.SocketErrorCode == SocketError.OperationAborted)
-            {
-                Debug.WriteLine("IOException: Operation aborted");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            finally
-            {
-                OnDisconnected();
-            }
+            _client.WriteLine($"PASS {_password}");
+            _client.WriteLine($"NICK {Username}");
+            _client.WriteLine($"USER {Username} 8 * :{Username}");
+            _client.Flush();
         }
 
         protected virtual void OnConnected()
@@ -86,57 +62,46 @@ namespace SimpleTwitchBot.Lib
             Connected?.Invoke(this, EventArgs.Empty);
         }
 
-        public void Disconnect()
+        private void Client_Disconnected(object sender, EventArgs e)
         {
-            _tcpClient?.Close();
-            _inputStream?.Close();
-            _outputStream?.Close();
+            OnDisconnected();
         }
 
-        private async Task StartListenAsync()
+        private void Client_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            while (_tcpClient.Connected)
+            var ircMessage = new IrcMessage(e.Message);
+            switch (ircMessage.Command)
             {
-                string rawMessage = await _inputStream.ReadLineAsync();
-                if (string.IsNullOrEmpty(rawMessage))
-                {
+                case "001":
+                    OnLoggedIn();
                     break;
-                }
-
-                var ircMessage = new IrcMessage(rawMessage);
-                switch (ircMessage.Command)
-                {
-                    case "001":
-                        OnLoggedIn();
-                        break;
-                    case "JOIN":
-                        if (Username.Equals(ircMessage.Username))
-                        {
-                            OnChannelJoined(ircMessage.Channel);
-                        }
-                        else
-                        {
-                            OnUserJoined(ircMessage.Username, ircMessage.Channel);
-                        }
-                        break;
-                    case "PART":
-                        if (Username.Equals(ircMessage.Username))
-                        {
-                            OnChannelParted(ircMessage.Channel);
-                        }
-                        else
-                        {
-                            OnUserParted(ircMessage.Username, ircMessage.Channel);
-                        }
-                        break;
-                    case "PING":
-                        string serverAddress = ircMessage.Params[0];
-                        OnPingReceived(serverAddress);
-                        break;
-                    default:
-                        OnIrcMessageReceived(ircMessage);
-                        break;
-                }
+                case "JOIN":
+                    if (Username.Equals(ircMessage.Username))
+                    {
+                        OnChannelJoined(ircMessage.Channel);
+                    }
+                    else
+                    {
+                        OnUserJoined(ircMessage.Username, ircMessage.Channel);
+                    }
+                    break;
+                case "PART":
+                    if (Username.Equals(ircMessage.Username))
+                    {
+                        OnChannelParted(ircMessage.Channel);
+                    }
+                    else
+                    {
+                        OnUserParted(ircMessage.Username, ircMessage.Channel);
+                    }
+                    break;
+                case "PING":
+                    string serverAddress = ircMessage.Params[0];
+                    OnPingReceived(serverAddress);
+                    break;
+                default:
+                    OnIrcMessageReceived(ircMessage);
+                    break;
             }
         }
 
@@ -187,6 +152,24 @@ namespace SimpleTwitchBot.Lib
             }
         }
 
+        public async Task ConnectAsync(string username, string password)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                throw new ArgumentNullException("Username cannot be empty", nameof(username));
+            }
+
+            Username = username.ToLower();
+            _password = password;
+
+            await _client.ConnectAsync(Hostname, Port);
+        }
+
+        public void Disconnect()
+        {
+            _client?.Disconnect();
+        }
+
         public void JoinChannel(string channel)
         {
             channel = channel.ToLower();
@@ -201,8 +184,8 @@ namespace SimpleTwitchBot.Lib
 
         public void SendIrcMessage(string message)
         {
-            _outputStream.WriteLine(message);
-            _outputStream.Flush();
+            _client.WriteLine(message);
+            _client.Flush();
         }
 
         public void SendChatMessage(string target, string message)
@@ -223,9 +206,7 @@ namespace SimpleTwitchBot.Lib
             }
             if (disposing)
             {
-                _tcpClient?.Dispose();
-                _inputStream?.Dispose();
-                _outputStream?.Dispose();
+                _client?.Dispose();
             }
             _disposed = true;
         }
