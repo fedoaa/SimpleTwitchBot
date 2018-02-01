@@ -7,7 +7,9 @@ namespace SimpleTwitchBot.Example
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main(string[] args) => MainAsync(args).GetAwaiter().GetResult();
+
+        private static async Task MainAsync(string[] args)
         {
             using (var client = new TwitchIrcClient("irc.chat.twitch.tv", 6667))
             {
@@ -19,7 +21,7 @@ namespace SimpleTwitchBot.Example
                 client.UserSubscribed += Client_UserSubscribed;
                 client.Disconnected += Client_Disconnected;
 
-                Task.Run(async () => await client.ConnectAsync("username", "oauth:token"));
+                await client.ConnectAsync("username", "oauth:token");
 
                 Console.ReadLine();
                 client.Disconnect();
@@ -29,7 +31,7 @@ namespace SimpleTwitchBot.Example
 
         private static void Client_LoggedIn(object sender, EventArgs e)
         {
-            var client = sender as IrcClient;
+            var client = sender as TwitchIrcClient;
             client?.JoinChannel("#channelName");
         }
 
