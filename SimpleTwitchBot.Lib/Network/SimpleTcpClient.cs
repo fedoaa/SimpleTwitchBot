@@ -9,16 +9,16 @@ namespace SimpleTwitchBot.Lib.Network
 {
     internal class SimpleTcpClient : ISimpleTcpClient
     {
-        public bool IsConnected { get; private set; }
-
         public event EventHandler Connected;
         public event EventHandler Disconnected;
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
 
         private bool _disposed = false;
-        private TcpClient _tcpClient;
-        private StreamReader _inputStream;
-        private StreamWriter _outputStream;
+
+        protected bool _isConnected = false;
+        protected TcpClient _tcpClient;
+        protected StreamReader _inputStream;
+        protected StreamWriter _outputStream;
 
         public async Task ConnectAsync(string host, int port)
         {
@@ -38,7 +38,7 @@ namespace SimpleTwitchBot.Lib.Network
 
         protected virtual void OnConnected()
         {
-            IsConnected = true;
+            _isConnected = true;
             Connected?.Invoke(this, EventArgs.Empty);
         }
 
@@ -77,9 +77,9 @@ namespace SimpleTwitchBot.Lib.Network
 
         protected virtual void OnDisconnected()
         {
-            if (IsConnected)
+            if (_isConnected)
             {
-                IsConnected = false;
+                _isConnected = false;
                 Disconnected?.Invoke(this, EventArgs.Empty);
             }
         }

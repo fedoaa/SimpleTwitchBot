@@ -6,8 +6,6 @@ namespace SimpleTwitchBot.Lib.Network
 {
     public interface ISimpleTcpClient : IDisposable
     {
-        bool IsConnected { get; }
-
         event EventHandler Connected;
         event EventHandler Disconnected;
         event EventHandler<MessageReceivedEventArgs> MessageReceived;
