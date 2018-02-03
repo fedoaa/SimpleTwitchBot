@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchChannelRitual : TwitchMessage
+    public class TwitchChannelRitual : TwitchMessageBase
     {
         public IDictionary<string, string> Badges { get; set; }
 
@@ -34,7 +34,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string UserId { get; set; }
 
-        public string Username { get; set; }
+        public string UserName { get; set; }
 
         public TwitchUserType UserType { get; set; }
 
@@ -60,7 +60,7 @@ namespace SimpleTwitchBot.Lib.Models
                         MessageId = tag.Value;
                         break;
                     case "login":
-                        Username = tag.Value;
+                        UserName = tag.Value;
                         break;
                     case "mod":
                         IsModerator = tag.Value.Equals("1");
@@ -92,8 +92,8 @@ namespace SimpleTwitchBot.Lib.Models
                 }
             }
 
-            Channel = message.Channel;
-            Message = message.Params.Count > 1 ? message.Params[1] : string.Empty;
+            Channel = message.GetChannel();
+            Message = message.GetParameterByIndex(1);
         }
     }
 }

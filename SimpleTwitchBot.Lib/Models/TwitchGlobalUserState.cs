@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchGlobalUserState : TwitchMessage
+    public class TwitchGlobalUserState : TwitchMessageBase
     {
         public IDictionary<string, string> Badges { get; set; }
 

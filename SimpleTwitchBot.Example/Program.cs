@@ -42,7 +42,7 @@ namespace SimpleTwitchBot.Example
 
         private static void Client_UserJoined(object sender, UserJoinedEventArgs e)
         {
-            Console.WriteLine($"{e.Username} has joined {e.Channel}");
+            Console.WriteLine($"{e.UserName} has joined {e.Channel}");
         }
 
         private static void Client_IrcMessageReceived(object sender, IrcMessageReceivedEventArgs e)
@@ -52,12 +52,12 @@ namespace SimpleTwitchBot.Example
 
         private static void Client_ChatMessageReceived(object sender, ChatMessageReceivedEventArgs e)
         {
-            Console.WriteLine($"{e.Message.Username}: {e.Message.Body}");
+            Console.WriteLine($"{e.Message.UserName}: {e.Message.Body}");
         }
 
         private static void Client_UserSubscribed(object sender, UserSubscribedEventArgs e)
         {
-            Console.WriteLine($"{e.Subscription.Username} just subscribed!");
+            Console.WriteLine($"{e.Subscription.UserName} just subscribed!");
         }
 
         private static void Client_Disconnected(object sender, EventArgs e)

@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchUserState: TwitchMessage
+    public class TwitchUserState: TwitchMessageBase
     {
         public IDictionary<string, string> Badges { get; set; }
 
@@ -50,7 +50,7 @@ namespace SimpleTwitchBot.Lib.Models
                 }
             }
 
-            Channel = message.Channel;
+            Channel = message.GetChannel();
         }
     }
 }

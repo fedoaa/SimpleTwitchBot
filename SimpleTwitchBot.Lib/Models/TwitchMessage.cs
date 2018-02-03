@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public abstract class TwitchMessage
+    public abstract class TwitchMessageBase
     {
         protected TwitchUserType ConvertToUserType(string tagValue)
         {

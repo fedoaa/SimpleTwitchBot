@@ -4,13 +4,13 @@ namespace SimpleTwitchBot.Lib.Events
 {
     public class UserJoinedEventArgs : EventArgs
     {
-        public string Username { get; }
+        public string UserName { get; }
 
         public string Channel { get; }
 
-        public UserJoinedEventArgs(string username, string channel)
+        public UserJoinedEventArgs(string userName, string channel)
         {
-            Username = username;
+            UserName = userName;
             Channel = channel;
         }
     }

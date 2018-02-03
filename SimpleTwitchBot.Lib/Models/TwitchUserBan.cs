@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchUserBan : TwitchMessage
+    public class TwitchUserBan : TwitchMessageBase
     {
         public string BanReason { get; set; }
 
@@ -12,7 +12,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string TargetUserId { get; set; }
 
-        public string TargetUsername { get; set; }
+        public string TargetUserName { get; set; }
 
         public long Timestamp { get; set; }
 
@@ -37,8 +37,8 @@ namespace SimpleTwitchBot.Lib.Models
                 }
             }
 
-            Channel = message.Channel;
-            TargetUsername = message.Params[1];
+            Channel = message.GetChannel();
+            TargetUserName = message.GetParameterByIndex(1);
         }
     }
 }

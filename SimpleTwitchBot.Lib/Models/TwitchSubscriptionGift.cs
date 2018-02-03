@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchSubscriptionGift : TwitchMessage
+    public class TwitchSubscriptionGift : TwitchMessageBase
     {
         public IDictionary<string, string> Badges { get; set; }
 
@@ -28,7 +28,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string RecipientUserId { get;set; }
 
-        public string RecipientUsername { get; set; }
+        public string RecipientUserName { get; set; }
 
         public string SubscriptionPlanName { get; set; }
 
@@ -42,7 +42,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string UserId { get; set; }
 
-        public string Username { get; set; }
+        public string UserName { get; set; }
 
         public TwitchUserType UserType { get; set; }
 
@@ -68,7 +68,7 @@ namespace SimpleTwitchBot.Lib.Models
                         MessageId = tag.Value;
                         break;
                     case "login":
-                        Username = tag.Value;
+                        UserName = tag.Value;
                         break;
                     case "mod":
                         IsModerator = tag.Value.Equals("1");
@@ -83,7 +83,7 @@ namespace SimpleTwitchBot.Lib.Models
                         RecipientUserId = tag.Value;
                         break;
                     case "msg-param-recipient-user-name":
-                        RecipientUsername = tag.Value;
+                        RecipientUserName = tag.Value;
                         break;
                     case "msg-param-sub-plan":
                         SubscriptionPlanType = ConvertToSubscriptionPlanType(tag.Value);
@@ -115,7 +115,7 @@ namespace SimpleTwitchBot.Lib.Models
                 }
             }
 
-            Channel = message.Channel;
+            Channel = message.GetChannel();
         }
     }
 }

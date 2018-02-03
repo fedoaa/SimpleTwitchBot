@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchChannelRaid : TwitchMessage
+    public class TwitchChannelRaid : TwitchMessageBase
     {
         public IDictionary<string, string> Badges { get; set; }
 
@@ -24,7 +24,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string RaiderDisplayName { get; set; }
 
-        public string RaiderUsername { get; set; }
+        public string RaiderUserName { get; set; }
 
         public string SystemMessage { get; set; }
 
@@ -34,7 +34,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string UserId { get; set; }
 
-        public string Username { get; set; }
+        public string UserName { get; set; }
 
         public TwitchUserType UserType { get; set; }
 
@@ -62,7 +62,7 @@ namespace SimpleTwitchBot.Lib.Models
                         MessageId = tag.Value;
                         break;
                     case "login":
-                        Username = tag.Value;
+                        UserName = tag.Value;
                         break;
                     case "mod":
                         IsModerator = tag.Value.Equals("1");
@@ -71,7 +71,7 @@ namespace SimpleTwitchBot.Lib.Models
                         RaiderDisplayName = tag.Value;
                         break;
                     case "msg-param-login":
-                        RaiderUsername = tag.Value;
+                        RaiderUserName = tag.Value;
                         break;
                     case "msg-param-viewerCount":
                         NumberOfViewers = int.Parse(tag.Value);
@@ -100,7 +100,7 @@ namespace SimpleTwitchBot.Lib.Models
                 }
             }
 
-            Channel = message.Channel;
+            Channel = message.GetChannel();
         }
     }
 }

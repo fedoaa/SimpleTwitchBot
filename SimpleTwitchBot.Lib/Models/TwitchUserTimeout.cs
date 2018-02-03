@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchUserTimeout : TwitchMessage
+    public class TwitchUserTimeout : TwitchMessageBase
     {
         public string Channel { get; set; }
 
@@ -10,7 +10,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string TargetUserId { get; set; }
 
-        public string TargetUsername { get; set; }
+        public string TargetUserName { get; set; }
 
         public int TimeoutDuration { get; set; }
 
@@ -42,8 +42,8 @@ namespace SimpleTwitchBot.Lib.Models
                 }
             }
 
-            Channel = message.Channel;
-            TargetUsername = message.Params[1];
+            Channel = message.GetChannel();
+            TargetUserName = message.GetParameterByIndex(1);
         }
     }
 }

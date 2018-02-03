@@ -1,6 +1,6 @@
 ﻿namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchChannelHost : TwitchMessage
+    public class TwitchChannelHost : TwitchMessageBase
     {
         public string HostingChannel { get; set; }
 
@@ -10,9 +10,9 @@
 
         public TwitchChannelHost(IrcMessage message)
         {
-            HostingChannel = message.Channel;
+            HostingChannel = message.GetChannel();
 
-            string[] parameters = message.Params[1].Split(' ');
+            string[] parameters = message.GetParameterByIndex(1).Split(' ');
             if (!parameters[0].Equals("-"))
             {
                 TargetChannel = $"#{parameters[0]}";

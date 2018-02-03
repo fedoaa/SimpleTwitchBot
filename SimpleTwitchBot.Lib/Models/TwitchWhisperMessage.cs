@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchWhisperMessage : TwitchMessage
+    public class TwitchWhisperMessage : TwitchMessageBase
     {
         public IDictionary<string, string> Badges { get; set; }
 
@@ -22,7 +22,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string UserId { get; set; }
 
-        public string Username { get; set; }
+        public string UserName { get; set; }
 
         public TwitchUserType UserType { get; set; }
 
@@ -62,8 +62,8 @@ namespace SimpleTwitchBot.Lib.Models
                 }
             }
 
-            Username = message.Username;
-            Body = message.Params[1];
+            UserName = message.GetUserName();
+            Body = message.GetParameterByIndex(1);
         }
     }
 }

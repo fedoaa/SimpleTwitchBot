@@ -14,7 +14,7 @@ namespace SimpleTwitchBot.Lib
 
         public string Hostname { get; private set; }
         public int Port { get; private set; }
-        public string Username { get; private set; }
+        public string UserName { get; private set; }
         public IList<string> JoinedChannels => _joinedChannels.AsReadOnly();
         public bool IsConnected { get; private set; } = false;
 
@@ -51,8 +51,8 @@ namespace SimpleTwitchBot.Lib
             OnConnected();
 
             _client.WriteLine($"PASS {_password}");
-            _client.WriteLine($"NICK {Username}");
-            _client.WriteLine($"USER {Username} 8 * :{Username}");
+            _client.WriteLine($"NICK {UserName}");
+            _client.WriteLine($"USER {UserName} 8 * :{UserName}");
             _client.Flush();
         }
 
@@ -76,27 +76,37 @@ namespace SimpleTwitchBot.Lib
                     OnLoggedIn();
                     break;
                 case "JOIN":
-                    if (Username.Equals(ircMessage.Username))
                     {
-                        OnChannelJoined(ircMessage.Channel);
+                        string userName = ircMessage.GetUserName();
+                        string channel = ircMessage.GetChannel();
+
+                        if (UserName.Equals(userName))
+                        {
+                            OnChannelJoined(channel);
+                        }
+                        else
+                        {
+                            OnUserJoined(userName, channel);
+                        }
+                        break;
                     }
-                    else
-                    {
-                        OnUserJoined(ircMessage.Username, ircMessage.Channel);
-                    }
-                    break;
                 case "PART":
-                    if (Username.Equals(ircMessage.Username))
                     {
-                        OnChannelParted(ircMessage.Channel);
+                        string userName = ircMessage.GetUserName();
+                        string channel = ircMessage.GetChannel();
+
+                        if (UserName.Equals(userName))
+                        {
+                            OnChannelParted(channel);
+                        }
+                        else
+                        {
+                            OnUserParted(userName, channel);
+                        }
+                        break;
                     }
-                    else
-                    {
-                        OnUserParted(ircMessage.Username, ircMessage.Channel);
-                    }
-                    break;
                 case "PING":
-                    string serverAddress = ircMessage.Params[0];
+                    string serverAddress = ircMessage.GetParameterByIndex(0);
                     OnPingReceived(serverAddress);
                     break;
                 default:
@@ -116,9 +126,9 @@ namespace SimpleTwitchBot.Lib
             ChannelJoined?.Invoke(this, new ChannelJoinedEventArgs(channel));
         }
 
-        protected virtual void OnUserJoined(string username, string channel)
+        protected virtual void OnUserJoined(string userName, string channel)
         {
-            UserJoined?.Invoke(this, new UserJoinedEventArgs(username, channel));
+            UserJoined?.Invoke(this, new UserJoinedEventArgs(userName, channel));
         }
 
         protected virtual void OnChannelParted(string channel)
@@ -127,9 +137,9 @@ namespace SimpleTwitchBot.Lib
             ChannelParted?.Invoke(this, new ChannelPartedEventArgs(channel));
         }
 
-        protected virtual void OnUserParted(string username, string channel)
+        protected virtual void OnUserParted(string userName, string channel)
         {
-            UserParted?.Invoke(this, new UserPartedEventArgs(username, channel));
+            UserParted?.Invoke(this, new UserPartedEventArgs(userName, channel));
         }
 
         protected virtual void OnPingReceived(string serverAddress)
@@ -152,14 +162,14 @@ namespace SimpleTwitchBot.Lib
             }
         }
 
-        public async Task ConnectAsync(string username, string password)
+        public async Task ConnectAsync(string userName, string password)
         {
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(userName))
             {
-                throw new ArgumentNullException("Username cannot be empty", nameof(username));
+                throw new ArgumentNullException("Username cannot be empty", nameof(userName));
             }
 
-            Username = username.ToLower();
+            UserName = userName.ToLower();
             _password = password;
 
             await _client.ConnectAsync(Hostname, Port);

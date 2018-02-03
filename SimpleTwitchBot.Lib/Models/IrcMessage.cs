@@ -5,26 +5,11 @@ namespace SimpleTwitchBot.Lib.Models
 {
     public class IrcMessage
     {
-        private string _username;
-        private string _prefix;
-
-        public string Channel => Params?.Count > 0 ? Params[0] : string.Empty;
-
-        public string Username => _username;
-
         public string Command { get; set; }
 
-        public IList<string> Params { get; set; }
+        public string[] Parameters { get; set; }
 
-        public string Prefix
-        {
-            get => _prefix;
-            set
-            {
-                _prefix = value;
-                _username = ExtractUsername(_prefix);
-            }
-        }
+        public string Prefix { get; set; }
 
         public string Raw { get; set; }
 
@@ -105,12 +90,22 @@ namespace SimpleTwitchBot.Lib.Models
             {
                 Command = message.Substring(position);
             }
-            Params = ircMessageParams;
+            Parameters = ircMessageParams.ToArray();
         }
 
-        private string ExtractUsername(string prefix)
+        public string GetChannel()
         {
-            string[] parts = prefix?.Split('!', '@');
+            return GetParameterByIndex(0);
+        }
+
+        public string GetParameterByIndex(int index)
+        {
+            return Parameters?.Length > index ? Parameters[index] : string.Empty;
+        }
+
+        public string GetUserName()
+        {
+            string[] parts = Prefix?.Split('!', '@');
             return parts?.Length > 1 ? parts[1] : string.Empty;
         }
     }

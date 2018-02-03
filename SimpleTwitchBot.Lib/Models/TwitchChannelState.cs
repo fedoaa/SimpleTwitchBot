@@ -2,7 +2,7 @@
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchChannelState: TwitchMessage
+    public class TwitchChannelState: TwitchMessageBase
     {
         public string BroadcasterLanguage { get; set; }
 
@@ -57,7 +57,7 @@ namespace SimpleTwitchBot.Lib.Models
                 }
             }
 
-            Channel = message.Channel;
+            Channel = message.GetChannel();
         }
     }
 }

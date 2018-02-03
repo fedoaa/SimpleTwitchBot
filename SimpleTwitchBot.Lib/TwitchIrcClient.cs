@@ -48,7 +48,7 @@ namespace SimpleTwitchBot.Lib
                     OnGlobalUserStateReceived(globalUserState);
                     break;
                 case "PRIVMSG":
-                    if (message.Username.Equals("jtv"))
+                    if (message.GetUserName().Equals("jtv"))
                     {
                         var hostedChannel = new TwitchHostedChannel(message);
                         OnChannelBeingHosted(hostedChannel);
@@ -205,9 +205,9 @@ namespace SimpleTwitchBot.Lib
             UserBanned?.Invoke(this, new UserBannedEventArgs(userBan));
         }
 
-        public void SendWhisperMessage(string username, string message)
+        public void SendWhisperMessage(string userName, string message)
         {
-            SendIrcMessage($"PRIVMSG #jtv :/w {username} {message}");
+            SendIrcMessage($"PRIVMSG #jtv :/w {userName} {message}");
         }
     }
 }

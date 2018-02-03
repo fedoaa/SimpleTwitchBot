@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchChatMessage : TwitchMessage
+    public class TwitchChatMessage : TwitchMessageBase
     {
         public IDictionary<string, string> Badges { get; set; }
 
@@ -37,7 +37,7 @@ namespace SimpleTwitchBot.Lib.Models
 
         public string UserId { get; set; }
 
-        public string Username { get; set; }
+        public string UserName { get; set; }
 
         public TwitchUserType UserType { get; set; }
 
@@ -92,10 +92,10 @@ namespace SimpleTwitchBot.Lib.Models
                 }
             }
 
-            Username = message.Username;
-            Channel = message.Channel;
+            UserName = message.GetUserName();
+            Channel = message.GetChannel();
 
-            string messageBody = message.Params[1];
+            string messageBody = message.GetParameterByIndex(1);
             Match actionMatch = Regex.Match(messageBody, @"\u0001ACTION\s(.+)\u0001");
             if (actionMatch.Success)
             {

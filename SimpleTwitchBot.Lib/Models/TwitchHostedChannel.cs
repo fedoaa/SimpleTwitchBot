@@ -1,6 +1,6 @@
 ﻿namespace SimpleTwitchBot.Lib.Models
 {
-    public class TwitchHostedChannel : TwitchMessage
+    public class TwitchHostedChannel : TwitchMessageBase
     {
         public string HosterDisplayName { get; set; }
 
@@ -12,9 +12,10 @@
 
         public TwitchHostedChannel(IrcMessage message)
         {
-            TargetChannel = $"#{message.Channel}";
+            string channel = message.GetChannel();
+            TargetChannel = $"#{channel}";
 
-            string jtvMessage = message.Params[1];
+            string jtvMessage = message.GetParameterByIndex(1);
 
             IsAutohost = jtvMessage.Contains("auto hosting");
 
