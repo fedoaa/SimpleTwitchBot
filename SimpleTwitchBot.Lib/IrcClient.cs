@@ -30,6 +30,7 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler<IrcMessageReceivedEventArgs> IrcMessageReceived;
         public event EventHandler LoggedIn;
         public event EventHandler<PingReceivedEventArgs> PingReceived;
+        public event EventHandler<UnprocessedIrcMessageReceivedEventArgs> UnprocessedIrcMessageReceived;
         public event EventHandler<UserJoinedEventArgs> UserJoined;
         public event EventHandler<UserPartedEventArgs> UserParted;
 
@@ -115,9 +116,10 @@ namespace SimpleTwitchBot.Lib
                     OnChannelModeReceived(channelMode);
                     break;
                 default:
-                    OnIrcMessageReceived(ircMessage);
+                    OnUnprocessedIrcMessageReceived(ircMessage);
                     break;
             }
+            OnIrcMessageReceived(ircMessage);
         }
 
         protected virtual void OnLoggedIn()
@@ -155,6 +157,11 @@ namespace SimpleTwitchBot.Lib
         protected virtual void OnChannelModeReceived(ChannelMode channelMode)
         {
             ChannelModeReceived?.Invoke(this, new ChannelModeReceivedEventArgs(channelMode));
+        }
+
+        protected virtual void OnUnprocessedIrcMessageReceived(IrcMessage message)
+        {
+            UnprocessedIrcMessageReceived?.Invoke(this, new UnprocessedIrcMessageReceivedEventArgs(message));
         }
 
         protected virtual void OnIrcMessageReceived(IrcMessage message)

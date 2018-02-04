@@ -67,7 +67,7 @@ namespace SimpleTwitchBot.Lib
             ModeratorParted?.Invoke(this, new ModeratorPartedEventArgs(userName, channel));
         }
 
-        protected override void OnIrcMessageReceived(IrcMessage message)
+        protected override void OnUnprocessedIrcMessageReceived(IrcMessage message)
         {
             switch (message.Command)
             {
@@ -125,8 +125,10 @@ namespace SimpleTwitchBot.Lib
                         OnUserBanned(userBan);
                     }
                     break;
+                default:
+                    base.OnUnprocessedIrcMessageReceived(message);
+                    break;
             }
-            base.OnIrcMessageReceived(message);
         }
 
         private void FireAnEventBasedOnUserNoticeType(IrcMessage message)
