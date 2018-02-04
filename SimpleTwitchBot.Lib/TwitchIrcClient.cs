@@ -14,6 +14,8 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler<ChannelRaidedEventArgs> ChannelRaided;
         public event EventHandler<ChannelRitualPerformedEventArgs> ChannelRitualPerformed;
         public event EventHandler<GlobalUserStateReceivedEventArgs> GlobalUserStateReceived;
+        public event EventHandler<ModeratorJoinedEventArgs> ModeratorJoined;
+        public event EventHandler<ModeratorPartedEventArgs> ModeratorParted;
         public event EventHandler<SubscriptionGiftedEventArgs> SubscriptionGifted;
         public event EventHandler<UserBannedEventArgs> UserBanned;
         public event EventHandler<UserSubscribedEventArgs> UserResubscribed;
@@ -28,19 +30,45 @@ namespace SimpleTwitchBot.Lib
 
         protected override void OnPingReceived(string serverAddress)
         {
-            base.OnPingReceived(serverAddress);
             SendIrcMessage($"PONG {serverAddress}");
+            base.OnPingReceived(serverAddress);
         }
 
         protected override void OnConnected()
         {
-            base.OnConnected();
             SendIrcMessage("CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership");
+            base.OnConnected();
+        }
+
+        protected override void OnChannelModeReceived(ChannelMode channelMode)
+        {
+            if (channelMode.Modes.Contains("o"))
+            {
+                switch (channelMode.Action)
+                {
+                    case ChannelModeActionType.Add:
+                        OnModeratorJoined(channelMode.ModeParams, channelMode.Channel);
+                        break;
+                    case ChannelModeActionType.Remove:
+                        OnModeratorParted(channelMode.ModeParams, channelMode.Channel);
+                        break;
+                }
+            }
+            base.OnChannelModeReceived(channelMode);
+        }
+
+        protected virtual void OnModeratorJoined(string userName, string channel)
+        {
+            ModeratorJoined?.Invoke(this, new ModeratorJoinedEventArgs(userName, channel));
+        }
+
+        protected virtual void OnModeratorParted(string userName, string channel)
+        {
+            ModeratorParted?.Invoke(this, new ModeratorPartedEventArgs(userName, channel));
         }
 
         protected override void OnIrcMessageReceived(IrcMessage message)
         {
-            base.OnIrcMessageReceived(message);
             switch (message.Command)
             {
                 case "GLOBALUSERSTATE":
@@ -98,6 +126,7 @@ namespace SimpleTwitchBot.Lib
                     }
                     break;
             }
+            base.OnIrcMessageReceived(message);
         }
 
         private void FireAnEventBasedOnUserNoticeType(IrcMessage message)

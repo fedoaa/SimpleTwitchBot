@@ -24,6 +24,7 @@ namespace SimpleTwitchBot.Lib
 
         public event EventHandler Connected;
         public event EventHandler<ChannelJoinedEventArgs> ChannelJoined;
+        public event EventHandler<ChannelModeReceivedEventArgs> ChannelModeReceived;
         public event EventHandler<ChannelPartedEventArgs> ChannelParted;
         public event EventHandler Disconnected;
         public event EventHandler<IrcMessageReceivedEventArgs> IrcMessageReceived;
@@ -109,6 +110,10 @@ namespace SimpleTwitchBot.Lib
                     string serverAddress = ircMessage.GetParameterByIndex(0);
                     OnPingReceived(serverAddress);
                     break;
+                case "MODE":
+                    var channelMode = new ChannelMode(ircMessage);
+                    OnChannelModeReceived(channelMode);
+                    break;
                 default:
                     OnIrcMessageReceived(ircMessage);
                     break;
@@ -145,6 +150,11 @@ namespace SimpleTwitchBot.Lib
         protected virtual void OnPingReceived(string serverAddress)
         {
             PingReceived?.Invoke(this, new PingReceivedEventArgs(serverAddress));
+        }
+
+        protected virtual void OnChannelModeReceived(ChannelMode channelMode)
+        {
+            ChannelModeReceived?.Invoke(this, new ChannelModeReceivedEventArgs(channelMode));
         }
 
         protected virtual void OnIrcMessageReceived(IrcMessage message)
