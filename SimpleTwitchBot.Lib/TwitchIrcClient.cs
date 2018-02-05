@@ -9,6 +9,7 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler<ChannelBeingHostedEventArgs> ChannelBeingHosted;
         public event EventHandler<ChannelHostingStartedEventArgs> ChannelHostingStarted;
         public event EventHandler<ChannelHostingStoppedEventArgs> ChannelHostingStopped;
+        public event EventHandler<ChatClearedEventArgs> ChatCleared;
         public event EventHandler<ChatMessageReceivedEventArgs> ChatMessageReceived;
         public event EventHandler<ChannelStateChangedEventArgs> ChannelStateChanged;
         public event EventHandler<ChannelRaidedEventArgs> ChannelRaided;
@@ -119,10 +120,15 @@ namespace SimpleTwitchBot.Lib
                         var userTimeout = new TwitchUserTimeout(message);
                         OnUserTimedOut(userTimeout);
                     }
-                    else
+                    else if (message.Tags.ContainsKey("ban-reason"))
                     {
                         var userBan = new TwitchUserBan(message);
                         OnUserBanned(userBan);
+                    }
+                    else
+                    {
+                        string channel = message.GetChannel();
+                        OnChatCleared(channel);
                     }
                     break;
                 default:
@@ -234,6 +240,11 @@ namespace SimpleTwitchBot.Lib
         protected virtual void OnUserBanned(TwitchUserBan userBan)
         {
             UserBanned?.Invoke(this, new UserBannedEventArgs(userBan));
+        }
+
+        protected virtual void OnChatCleared(string channel)
+        {
+            ChatCleared?.Invoke(this, new ChatClearedEventArgs(channel));
         }
 
         public void SendWhisperMessage(string userName, string message)
