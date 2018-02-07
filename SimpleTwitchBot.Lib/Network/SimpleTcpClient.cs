@@ -7,23 +7,32 @@ using System.Threading.Tasks;
 
 namespace SimpleTwitchBot.Lib.Network
 {
-    internal class SimpleTcpClient : ISimpleTcpClient
+    public class SimpleTcpClient : ISimpleTcpClient
     {
+        private bool _disposed = false;
+
+        public string Hostname { get; protected set; }
+        public int Port { get; protected set; }
+        public bool IsConnected { get; protected set; }
+
         public event EventHandler Connected;
         public event EventHandler Disconnected;
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
 
-        private bool _disposed = false;
-
-        protected bool _isConnected = false;
         protected TcpClient _tcpClient;
         protected StreamReader _inputStream;
         protected StreamWriter _outputStream;
 
-        public async Task ConnectAsync(string host, int port)
+        public SimpleTcpClient(string host, int port)
+        {
+            Hostname = host;
+            Port = port;
+        }
+
+        public async Task ConnectAsync()
         {
             _tcpClient = new TcpClient();
-            await _tcpClient.ConnectAsync(host, port);
+            await _tcpClient.ConnectAsync(Hostname, Port);
 
             NetworkStream networkStream = _tcpClient.GetStream();
             _inputStream = new StreamReader(networkStream);
@@ -38,7 +47,7 @@ namespace SimpleTwitchBot.Lib.Network
 
         protected virtual void OnConnected()
         {
-            _isConnected = true;
+            IsConnected = true;
             Connected?.Invoke(this, EventArgs.Empty);
         }
 
@@ -77,9 +86,9 @@ namespace SimpleTwitchBot.Lib.Network
 
         protected virtual void OnDisconnected()
         {
-            if (_isConnected)
+            if (IsConnected)
             {
-                _isConnected = false;
+                IsConnected = false;
                 Disconnected?.Invoke(this, EventArgs.Empty);
             }
         }

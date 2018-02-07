@@ -12,15 +12,14 @@ namespace SimpleTwitchBot.Lib
     {
         private readonly List<string> _joinedChannels = new List<string>();
 
-        public string Hostname { get; private set; }
-        public int Port { get; private set; }
-        public string UserName { get; private set; }
-        public IList<string> JoinedChannels => _joinedChannels.AsReadOnly();
-        public bool IsConnected { get; private set; } = false;
-
         private bool _disposed = false;
-        private ISimpleTcpClient _client;
         private string _password;
+        private ISimpleTcpClient _client;
+
+        public string UserName { get; protected set; }
+        public IList<string> JoinedChannels => _joinedChannels.AsReadOnly();
+        public bool IsConnected => _client.IsConnected;
+        public ISimpleTcpClient Client => _client;
 
         public event EventHandler Connected;
         public event EventHandler<ChannelJoinedEventArgs> ChannelJoined;
@@ -34,13 +33,11 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler<UserJoinedEventArgs> UserJoined;
         public event EventHandler<UserPartedEventArgs> UserParted;
 
-        public IrcClient(string host, int port) : this(new SimpleTcpClient())
+        public IrcClient(string host, int port) : this(new SimpleTcpClient(host, port))
         {
-            Hostname = host;
-            Port = port;
         }
 
-        internal IrcClient(ISimpleTcpClient client)
+        public IrcClient(ISimpleTcpClient client)
         {
             _client = client;
             _client.Connected += Client_Connected;
@@ -60,13 +57,18 @@ namespace SimpleTwitchBot.Lib
 
         protected virtual void OnConnected()
         {
-            IsConnected = true;
             Connected?.Invoke(this, EventArgs.Empty);
         }
 
         private void Client_Disconnected(object sender, EventArgs e)
         {
             OnDisconnected();
+        }
+
+        protected virtual void OnDisconnected()
+        {
+            _joinedChannels.Clear();
+            Disconnected?.Invoke(this, EventArgs.Empty);
         }
 
         private void Client_MessageReceived(object sender, MessageReceivedEventArgs e)
@@ -169,16 +171,6 @@ namespace SimpleTwitchBot.Lib
             IrcMessageReceived?.Invoke(this, new IrcMessageReceivedEventArgs(message));
         }
 
-        protected virtual void OnDisconnected()
-        {
-            if (IsConnected)
-            {
-                IsConnected = false;
-                _joinedChannels.Clear();
-                Disconnected?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
         public async Task ConnectAsync(string userName, string password)
         {
             if (string.IsNullOrEmpty(userName))
@@ -189,7 +181,7 @@ namespace SimpleTwitchBot.Lib
             UserName = userName.ToLower();
             _password = password;
 
-            await _client.ConnectAsync(Hostname, Port);
+            await _client.ConnectAsync();
         }
 
         public void Disconnect()

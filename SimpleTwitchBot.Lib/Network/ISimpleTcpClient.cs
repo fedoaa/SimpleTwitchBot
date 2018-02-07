@@ -6,11 +6,15 @@ namespace SimpleTwitchBot.Lib.Network
 {
     public interface ISimpleTcpClient : IDisposable
     {
+        string Hostname { get; }
+        int Port { get; }
+        bool IsConnected { get; }
+
         event EventHandler Connected;
         event EventHandler Disconnected;
         event EventHandler<MessageReceivedEventArgs> MessageReceived;
 
-        Task ConnectAsync(string host, int port);
+        Task ConnectAsync();
         void Disconnect();
         void WriteLine(string value);
         void Flush();
