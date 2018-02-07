@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SimpleTwitchBot.Lib.Network
 {
-    public class SimpleTcpClient : ISimpleTcpClient
+    public class NetworkClient : INetworkClient
     {
         private bool _disposed = false;
 
@@ -23,7 +23,7 @@ namespace SimpleTwitchBot.Lib.Network
         protected StreamReader _inputStream;
         protected StreamWriter _outputStream;
 
-        public SimpleTcpClient(string host, int port)
+        public NetworkClient(string host, int port)
         {
             Hostname = host;
             Port = port;

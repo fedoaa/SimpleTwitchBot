@@ -14,12 +14,12 @@ namespace SimpleTwitchBot.Lib
 
         private bool _disposed = false;
         private string _password;
-        private ISimpleTcpClient _client;
+        private INetworkClient _client;
 
         public string UserName { get; protected set; }
         public IList<string> JoinedChannels => _joinedChannels.AsReadOnly();
         public bool IsConnected => _client.IsConnected;
-        public ISimpleTcpClient Client => _client;
+        public INetworkClient Client => _client;
 
         public event EventHandler Connected;
         public event EventHandler<ChannelJoinedEventArgs> ChannelJoined;
@@ -33,11 +33,11 @@ namespace SimpleTwitchBot.Lib
         public event EventHandler<UserJoinedEventArgs> UserJoined;
         public event EventHandler<UserPartedEventArgs> UserParted;
 
-        public IrcClient(string host, int port) : this(new SimpleTcpClient(host, port))
+        public IrcClient(string host, int port) : this(new NetworkClient(host, port))
         {
         }
 
-        public IrcClient(ISimpleTcpClient client)
+        public IrcClient(INetworkClient client)
         {
             _client = client;
             _client.Connected += Client_Connected;

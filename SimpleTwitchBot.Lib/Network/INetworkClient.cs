@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace SimpleTwitchBot.Lib.Network
 {
-    public interface ISimpleTcpClient : IDisposable
+    public interface INetworkClient : IDisposable
     {
         string Hostname { get; }
         int Port { get; }
